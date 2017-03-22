@@ -164,6 +164,11 @@ def index():
 #
 @app.route('/another')
 def another():
+  cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid='00001' ")
+  information = []
+  for result in cursor:
+    names.append(result)  # can also be accessed using result[0]
+  cursor.close()
   return render_template("another.html")
 
 
