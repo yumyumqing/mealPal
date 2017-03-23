@@ -113,12 +113,12 @@ def index():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT name FROM users")
+  cursor = g.conn.execute("SELECT name FROM test")
   names = []
   for result in cursor:
     names.append(result['name'])  # can also be accessed using result[0]
   cursor.close()
-
+  
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
   # pass data to a template and dynamically generate HTML based on the data
@@ -154,6 +154,16 @@ def index():
   #
   return render_template("index.html", **context)
 
+@app.route('/profile')
+def profile():
+  cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = ?", uname)
+  information = []
+  for result in cursor:
+    information.append(result)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data = information)
+  return render_template("profile.html", **context)
+
 #
 # This is an example of a different path.  You can see it at:
 # 
@@ -176,8 +186,9 @@ def another():
 # Example of adding new data to the database
 @app.route('/add', methods=['POST'])
 def add():
-  name = request.form['name']
-  g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
+  name = []
+  name.append(request.form['name'])
+  g.conn.execute('INSERT INTO test VALUES (?)', name)
   return redirect('/')
 
 # Request send on swipe page
@@ -208,10 +219,12 @@ def send():
     g.conn.execute('INSERT INTO requests(send_uid, accepted_uid, date, contact_info) VALUES ('10001', '10003', [2017,3,22], '3473229595')')
     return render_template("swipe.html")
 
-@app.route('/login')
+@app.route('/login',methods=['POST'])
 def login():
-    abort(401)
-    this_is_never_executed()
+    name = []
+    name.append(request.form['name'])
+    uname = dict(data = name)
+    return render_template("profile.html", **uname)
 
 
 if __name__ == "__main__":
