@@ -8,19 +8,8 @@
 
 
 <body>
-  <h1>All Users</h1>
-  <div>{{data}}</div>
-
-  <div>
-    {% for n in data %}
-    <div>{{n}}</div>
-    {% endfor %}
-  </div>
-
-<p><a href="another">Go to the other page</a></p>
-
-<form method="POST" action="/add">
-<p>Name of the User: <input type="text" name="name"> <input type="submit" value="Add"></p>
+<form method="POST" action="/login">
+<p>Name of the User: <input type="text" name="name"> <input type="submit" value="login"></p>
 </form>
 
 </body>
