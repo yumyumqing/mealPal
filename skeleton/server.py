@@ -180,6 +180,33 @@ def add():
   g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
   return redirect('/')
 
+# Request send on swipe page
+@app.route('/request', methods=['POST'])
+def request():
+   # if 
+
+   # return render_template("sendreject.html")
+
+  #  else
+  #  senderuid = #uid
+  #  return render_template("request.html", **senderuid)
+  return ("request.html")
+
+# Request send in request page
+@app.route('/send', methods=['POST'])
+def send():
+ """   number = request.form['number']
+    year = request.form['year']
+    month = request.form['month']
+    day = request.form['day']
+    date = []
+    date.append(year)
+    date.append(month)
+    date.append(day) """
+
+   # g.conn.execute('INSERT INTO requests(send_uid, date, contact_info) VALUES (?,?,?)', senderuid, date, number)
+    g.conn.execute('INSERT INTO requests(send_uid, accepted_uid, date, contact_info) VALUES ('10001', '10003', [2017,3,22], '3473229595')')
+    return render_template("swipe.html")
 
 @app.route('/login')
 def login():
