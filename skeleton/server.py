@@ -167,9 +167,11 @@ def another():
   cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid='00001' ")
   information = []
   for result in cursor:
-    names.append(result)  # can also be accessed using result[0]
+    print(result)
+    information.append(result[0])  # can also be accessed using result[0]
   cursor.close()
-  return render_template("another.html")
+  context = dict(data = information)
+  return render_template("another.html", **context)
 
 
 # Example of adding new data to the database
