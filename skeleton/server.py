@@ -17,7 +17,7 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, g, redirect, Response, send_from_directory
 import random
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -93,7 +93,6 @@ def index():
 
 @app.route('/profile')
 def profile():
-  
   return render_template("another.html", **context)
 
 
@@ -161,7 +160,6 @@ def swipe():
 #    isback = request.form['submit']
 #    if (isback == 'Back to swipe'):
 #        return redirect(url_for('swipe'))
-
     randomNum = random.randint(1,9) + 10000
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
     users = []
@@ -198,9 +196,8 @@ def swipe():
     for result in cursor3:
         rests2.append(result)
     cursor3.close()
-
+    global context
     context = dict(data = users, rests1=rests1, rid1=rid1, rests2=rests2)
-
     return render_template("swipe.html", **context)
 
 # get restaurant profile page
@@ -215,6 +212,14 @@ def restaurant():
     cursor.close()
     context = dict(data = information)
     return render_template("restaurant.html", **context)
+
+def redirect_url(default='index'):
+    return request.referrer 
+  
+@app.route('/back', methods=['POST'])
+def back():
+    
+    return render_template("swipe.html", **context)
 
 if __name__ == "__main__":
   import click
