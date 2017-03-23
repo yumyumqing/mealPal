@@ -23,6 +23,9 @@
   <div>
     {% for n in rests1 %}
     <div>{{n}}</div>
+    <form method="POST" action="/restaurant">
+        <input type="submit" name="submit" value="Check Restaurant">
+    </form>
     {% endfor %}
   </div>
   

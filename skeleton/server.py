@@ -139,13 +139,17 @@ def swipe():
         if likeNotExists:
             g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10001','10003')")
 
+#    isback = request.form['submit']
+#    if (isback == 'Back to swipe'):
+#        return redirect(url_for('swipe'))
+
     randomNum = random.randint(1,9) + 10000
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
     users = []
     rests1 = []
-    # rid1 = []
+    rid1 = []
     rests2 = []
-
+    rid2 = []
 
     for result in cursor:
       users.append(result)  
@@ -158,6 +162,14 @@ def swipe():
     for result in cursor2:
         rests1.append(result)
     cursor2.close()
+    
+    cursor2id = g.conn.execute("SELECT R.rid \
+                                FROM restaurants R, ate A \
+                                WHERE R.rid=A.rid AND A.uid=%s",\
+                                str(randomNum))
+    for result in cursor2id:
+        rid1.append(result)
+    cursor2id.close()
 
     cursor3 = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, marked M \
@@ -167,10 +179,14 @@ def swipe():
         rests2.append(result)
     cursor3.close()
 
-    context = dict(data = users, rests1=rests1, rests2=rests2)
+    context = dict(data = users, rests1=rests1, rid1=rid1, rests2=rests2)
 
     return render_template("swipe.html", **context)
 
+# get restaurant profile page
+@app.route('/restaurant', methods=['POST'])
+def restaurant():
+    return render_template("restaurant.html")
 
 if __name__ == "__main__":
   import click
