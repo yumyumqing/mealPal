@@ -141,10 +141,14 @@ def swipe():
 
     randomNum = random.randint(1,9) + 10000
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
-    names = []
+    users = []
+    rests1 = []
+    # rid1 = []
+    rests2 = []
+
 
     for result in cursor:
-      names.append(result)  
+      users.append(result)  
     cursor.close()
 
     cursor2 = g.conn.execute("SELECT R.rname \
@@ -152,7 +156,7 @@ def swipe():
                              WHERE R.rid=A.rid AND A.uid=%s",\
                              str(randomNum))
     for result in cursor2:
-        names.append(result)
+        rests1.append(result)
     cursor2.close()
 
     cursor3 = g.conn.execute("SELECT R.rname \
@@ -160,10 +164,10 @@ def swipe():
                              WHERE R.rid=M.rid AND M.uid=%s",\
                              str(randomNum))
     for result in cursor3:
-        names.append(result)
+        rests2.append(result)
     cursor3.close()
 
-    context = dict(data = names)
+    context = dict(data = users, rests1=rests1, rests2=rests2)
 
     return render_template("swipe.html", **context)
 

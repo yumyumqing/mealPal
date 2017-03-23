@@ -16,6 +16,24 @@
     <div>{{n}}</div>
     {% endfor %}
   </div>
+  
+  <h3>The person has eaten at:</h3>
+  <div>{{rests1}}</div>
+
+  <div>
+    {% for n in rests1 %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div>
+  
+  <h3>The person wants to eat at:</h3>
+  <div>{{rests2}}</div>
+
+  <div>
+    {% for n in rests2 %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div>
 
 <form method="POST" action="/swipe">
     <p><input type="submit" name="submit" value="No">
