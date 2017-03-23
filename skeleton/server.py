@@ -92,13 +92,6 @@ def index():
 
 @app.route('/profile')
 def profile():
-  cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = '10002'")
-  information = []
-  for result in cursor:
-      for column in result:
-          information.append(result)
-  cursor.close()
-  context = dict(data = information)
   return render_template("another.html", **context)
 
 
@@ -124,11 +117,15 @@ def add():
 
 @app.route('/login',methods=['POST'])
 def login():
-    name = []
-    name.append(request.form['name'])
-    uname = dict(data = name)
-    print(uname)
-    return render_template("profile.html", **uname)
+    name=request.form['name']
+    cursor = g.conn.execute("SELECT * FROM users U WHERE U.name='Lin Shi'")
+    information = []
+    for result in cursor:
+        for column in result:
+            information.append(column)
+    cursor.close()
+    context = dict(data = information)
+    return render_template("profile.html", **context)
 
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
