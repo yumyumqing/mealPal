@@ -131,24 +131,16 @@ def login():
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
 def swipe():
+    isLike = request.form['submit']
+    if (isLike == 'Yes'):
+        print('like')
+        liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid='10001' AND I.likee_uid='10003'")
+        likeNotExists = (liker_uid.fetchone()[0] == 0)
+        if likeNotExists:
+            g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10001','10003')")
+
     randomNum = random.randint(1,9) + 10000
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
-    names = []
-    for result in cursor:
-      names.append(result)  
-    cursor.close()
-    context = dict(data = names)
-
-    return render_template("swipe.html", **context)
-
-# A user shows interest
-@app.route('/like', methods=['POST'])
-def like():
-    liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid='10001' AND I.likee_uid='10003'")
-    likeNotExists = (liker_uid.fetchone()[0] == 0)
-    if likeNotExists:
-        g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10001','10003')")
-    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid='10002'")
     names = []
     for result in cursor:
       names.append(result)  
