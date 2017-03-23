@@ -1,0 +1,29 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>Do you like this one?</h1>
+  <div>{{data}}</div>
+
+  <div>
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div>
+
+<form method="POST" action="/swipe">
+    <p><input type="submit" value="No">
+</form>
+
+<form method="POST" action="/like">
+    <input type="submit" value="Yes"></p>
+</body>
+
+
+</html>
