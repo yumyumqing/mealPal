@@ -142,8 +142,8 @@ def swipe():
 # A user shows interest
 @app.route('/like', methods=['POST'])
 def like():
-    if ((liker_uid = g.conn.execute("SELECT I.liker_uid FROM interest I WHERE I.liker_uid='10002' AND I.likee_uid='10001'")) != '10002'):
-        g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10002','10001')")
+    #if ((liker_uid = g.conn.execute("SELECT I.liker_uid FROM interest I WHERE I.liker_uid='10002' AND I.likee_uid='10001'")) != '10002'):
+     #   g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10002','10001')")
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid='10002'")
     names = []
     for result in cursor:
