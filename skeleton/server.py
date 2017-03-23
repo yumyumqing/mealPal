@@ -93,6 +93,7 @@ def index():
 
 @app.route('/profile')
 def profile():
+  
   return render_template("another.html", **context)
 
 
@@ -144,7 +145,6 @@ def login():
             information.append(column)
     cursor.close()
     context["marked"] = information
-    print(context)
     return render_template("profile.html", **context)
 
 # Random suggestion swiping page
@@ -165,11 +165,12 @@ def swipe():
     randomNum = random.randint(1,9) + 10000
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
     users = []
+    global rests1
     rests1 = []
     rid1 = []
     rests2 = []
     rid2 = []
-
+    
     for result in cursor:
       users.append(result)  
     cursor.close()
@@ -205,7 +206,15 @@ def swipe():
 # get restaurant profile page
 @app.route('/restaurant', methods=['POST'])
 def restaurant():
-    return render_template("restaurant.html")
+    cursor = g.conn.execute("SELECT * FROM restaurants R WHERE R.rname = %s", rests1[0])
+    print(rests1[0])
+    information = []
+    for result in cursor:
+        for column in result:
+            information.append(column)
+    cursor.close()
+    context = dict(data = information)
+    return render_template("restaurant.html", **context)
 
 if __name__ == "__main__":
   import click
