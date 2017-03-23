@@ -118,15 +118,34 @@ def add():
 
 @app.route('/login',methods=['POST'])
 def login():
-    name=request.form['name']
-    cursor = g.conn.execute("SELECT * FROM users U WHERE U.name='Lin Shi'")
+    error = None
+    context = dict(error = error)
+    name =  request.form['name']
+    cursor = g.conn.execute("SELECT * FROM users U WHERE U.name = %s", name)
     information = []
     for result in cursor:
         for column in result:
             information.append(column)
     cursor.close()
-    context = dict(data = information)
-    return render_template("request.html", **context)
+    context["data"] = information
+    
+    cursor = g.conn.execute("SELECT R.rid, R.rname, R.cuisine, R.link, R.lid FROM restaurants R, ate A, users U WHERE R.rid = A.rid AND A.uid = U.uid AND U.name = %s", name)
+    information = []
+    for result in cursor:
+        for column in result:
+            information.append(column)
+    cursor.close()
+    context["eaten"] = information
+
+    cursor = g.conn.execute("SELECT R.rid, R.rname, R.cuisine, R.link, R.lid FROM restaurants R, marked M, users U WHERE R.rid = M.rid AND M.uid = U.uid AND U.name = %s", name)
+    information = []
+    for result in cursor:
+        for column in result:
+            information.append(column)
+    cursor.close()
+    context["marked"] = information
+    print(context)
+    return render_template("profile.html", **context)
 
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
