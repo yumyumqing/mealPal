@@ -118,36 +118,9 @@ def another():
 def add():
   name = []
   name.append(request.form['name'])
-  g.conn.execute('INSERT INTO test VALUES (?)', name)
+  g.conn.execute('INSERT INTO test(name) VALUES ?', name)
   return redirect('/')
 
-# Request send on swipe page
-@app.route('/request', methods=['POST'])
-def request():
-   # if 
-
-   # return render_template("sendreject.html")
-
-  #  else
-  #  senderuid = #uid
-  #  return render_template("request.html", **senderuid)
-  return ("request.html")
-
-# Request send in request page
-@app.route('/send', methods=['POST'])
-def send():
- """   number = request.form['number']
-    year = request.form['year']
-    month = request.form['month']
-    day = request.form['day']
-    date = []
-    date.append(year)
-    date.append(month)
-    date.append(day) """
-
-   # g.conn.execute('INSERT INTO requests(send_uid, date, contact_info) VALUES (?,?,?)', senderuid, date, number)
-    g.conn.execute('INSERT INTO requests(send_uid, accepted_uid, date, contact_info) VALUES ('10001', '10003', [2017,3,22], '3473229595')')
-    return render_template("swipe.html")
 
 @app.route('/login',methods=['POST'])
 def login():
@@ -156,6 +129,32 @@ def login():
     uname = dict(data = name)
     print(uname)
     return render_template("profile.html", **uname)
+
+# Random suggestion swiping page
+@app.route('/swipe', methods=['POST'])
+def swipe():
+    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid='10001'")
+    names = []
+    for result in cursor:
+      names.append(result)  
+    cursor.close()
+    context = dict(data = names)
+
+    return render_template("swipe.html", **context)
+
+# A user shows interest
+@app.route('/like', methods=['POST'])
+def like():
+    if ((liker_uid = g.conn.execute("SELECT I.liker_uid FROM interest I WHERE I.liker_uid='10002' AND I.likee_uid='10001'")) != '10002'):
+        g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10002','10001')")
+    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid='10002'")
+    names = []
+    for result in cursor:
+      names.append(result)  
+    cursor.close()
+    context = dict(data = names)
+
+    return render_template("swipe.html", **context)
 
 
 if __name__ == "__main__":
