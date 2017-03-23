@@ -16,8 +16,24 @@
     <div>{{n}}</div>
     {% endfor %}
   </div>
-  <h1>eaten</h1>
-  <h1>marked</h1>
+
+  <h1>Eaten</h1>
+  <div>{{eaten}}</div>
+
+  <div>
+    {% for n in eaten %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div>
+
+  <h1>Marked</h1>
+  <div>{{marked}}</div>
+
+  <div>
+    {% for n in marked %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div>
 <p><a href="another">Go to the other page</a></p>
 
 </body>
