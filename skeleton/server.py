@@ -18,6 +18,7 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response
+import random
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -125,12 +126,13 @@ def login():
             information.append(column)
     cursor.close()
     context = dict(data = information)
-    return render_template("profile.html", **context)
+    return render_template("request.html", **context)
 
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
 def swipe():
-    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid='10001'")
+    randomNum = random.randint(1,9) + 10000
+    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
     names = []
     for result in cursor:
       names.append(result)  
@@ -142,8 +144,10 @@ def swipe():
 # A user shows interest
 @app.route('/like', methods=['POST'])
 def like():
-    #if ((liker_uid = g.conn.execute("SELECT I.liker_uid FROM interest I WHERE I.liker_uid='10002' AND I.likee_uid='10001'")) != '10002'):
-     #   g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10002','10001')")
+    liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid='10001' AND I.likee_uid='10003'")
+    likeNotExists = (liker_uid.fetchone()[0] == 0)
+    if likeNotExists:
+        g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10001','10003')")
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid='10002'")
     names = []
     for result in cursor:
