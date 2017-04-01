@@ -91,11 +91,6 @@ def index():
   context = dict(data = names)
   return render_template("index.html", **context)
 
-@app.route('/profile')
-def profile():
-  return render_template("another.html", **context)
-
-
 @app.route('/another')
 def another():
   cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid='10001' ")
@@ -149,12 +144,12 @@ def food_profile():
     rid.append(result)
   cursor2.close()
   context = dict(id = rid, name = rname)
-  print(context)
   return render_template("food_profile.html", result=context)
 
 @app.route('/login',methods=['POST'])
 def login():
     error = None
+    global context
     context = dict(error = error)
     name =  request.form['name']
     global myUid
@@ -167,7 +162,7 @@ def login():
     cursor.close()
     context["data"] = information
     
-    cursor = g.conn.execute("SELECT R.rid, R.rname, R.cuisine, R.link, R.lid FROM restaurants R, ate A, users U WHERE R.rid = A.rid AND A.uid = U.uid AND U.name = %s", name)
+    cursor = g.conn.execute("SELECT R.rname, A.score, A.review FROM restaurants R, ate A, users U WHERE R.rid = A.rid AND A.uid = U.uid AND U.uid = %s", name)
     information = []
     for result in cursor:
         for column in result:
@@ -175,7 +170,7 @@ def login():
     cursor.close()
     context["eaten"] = information
 
-    cursor = g.conn.execute("SELECT R.rid, R.rname, R.cuisine, R.link, R.lid FROM restaurants R, marked M, users U WHERE R.rid = M.rid AND M.uid = U.uid AND U.name = %s", name)
+    cursor = g.conn.execute("SELECT R.rname FROM restaurants R, marked M, users U WHERE R.rid = M.rid AND M.uid = U.uid AND U.uid = %s", name)
     information = []
     for result in cursor:
         for column in result:
@@ -243,7 +238,6 @@ def swipe():
     for result in cursor3:
         rests2.append(result)
     cursor3.close()
-    global context
     context = dict(data = otherUsersDisplay, rests1=rests1, rid1=rid1, rests2=rests2)
     return render_template("swipe.html", **context)
 
@@ -262,10 +256,13 @@ def restaurant():
 
 def redirect_url(default='index'):
     return request.referrer 
+
+@app.route('/back_to_personal_profile', methods=['POST'])
+def back_to_personal_profile():
+    return render_template("profile.html", **context)
   
 @app.route('/back', methods=['POST'])
-def back():
-    
+def back():   
     return render_template("swipe.html", **context)
 
 if __name__ == "__main__":
