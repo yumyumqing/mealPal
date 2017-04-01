@@ -15,26 +15,31 @@
     {{n}}
     {% endfor %}
   </div>
-  
+
   <h3>The person has eaten at:</h3>
-  <div>Restaurant Name&nbsp&nbsp&nbsp
-       Score&nbsp&nbsp&nbsp
-       Review</div>
-  <div>
-    {% for n in rests1 %}
-    <div>{{n[0]}}&nbsp&nbsp&nbsp&nbsp{{n[1]}}&nbsp&nbsp&nbsp&nbsp{{n[2]}}</div>
-    <form method="POST" action="/restaurant">
-        <input type="submit" name="submit" value="Check Eaten Restaurant">
-    </form>
+  <table border = 1>
+  <thead><tr><th>Restaurant Name</th><th>Score</th><th>Review</th><tr><thead>
+  <tbody>
+    {% for row_index in range(result['name']|count) %}
+        <tr>
+          <td>{{ result['name'][row_index][0] }}</td>
+          <td>{{ result['score'][row_index][0] }}</td>
+          <td>{{ result['review'][row_index][0] }}</td>
+        </tr>
     {% endfor %}
-  </div>
-  
+  </tbody>
+  </table>
+
+  <form method="POST" action="/restaurant">
+      <input type="submit" name="submit" value="Check Eaten Restaurant">
+  </form>
+
   <h3>The person wants to eat at:</h3>
 
   <div>
     {% for n in rests2 %}
     <div>{{n[0]}}</div>
-    <form method="POST" action="/restaurant_marked">
+    <form method="POST" action="/restaurant">
         <input type="submit" name="submit" value="Check Marked Restaurant">
     </form>
 
