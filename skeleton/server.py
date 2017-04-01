@@ -121,7 +121,9 @@ def login():
     error = None
     context = dict(error = error)
     name =  request.form['name']
-    cursor = g.conn.execute("SELECT * FROM users U WHERE U.name = %s", name)
+    global myUid
+    myUid = name
+    cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = %s", name)
     information = []
     for result in cursor:
         for column in result:
@@ -152,10 +154,10 @@ def swipe():
     isLike = request.form['submit']
     if (isLike == 'Yes'):
         print('like')
-        liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", users[0])
+        liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", myUid, otherUsers[0][0])
         likeNotExists = (liker_uid.fetchone()[0] == 0)
         if likeNotExists:
-            g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10001','10003')")
+            g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES (%s,%s)", myUid, otherUsers[0][0])
 
 #    isback = request.form['submit']
 #    if (isback == 'Back to swipe'):
