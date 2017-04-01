@@ -152,7 +152,7 @@ def swipe():
     isLike = request.form['submit']
     if (isLike == 'Yes'):
         print('like')
-        liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid='10001' AND I.likee_uid='10003'")
+        liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", users[0])
         likeNotExists = (liker_uid.fetchone()[0] == 0)
         if likeNotExists:
             g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES ('10001','10003')")
@@ -162,7 +162,8 @@ def swipe():
 #        return redirect(url_for('swipe'))
     randomNum = random.randint(1,9) + 10000
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
-    users = []
+    global otherUsers
+    otherUsers = []
     global rests1
     rests1 = []
     rid1 = []
@@ -170,7 +171,7 @@ def swipe():
     rid2 = []
     
     for result in cursor:
-      users.append(result)  
+      otherUsers.append(result)  
     cursor.close()
 
     cursor2 = g.conn.execute("SELECT R.rname \
@@ -197,7 +198,7 @@ def swipe():
         rests2.append(result)
     cursor3.close()
     global context
-    context = dict(data = users, rests1=rests1, rid1=rid1, rests2=rests2)
+    context = dict(data = otherUsers, rests1=rests1, rid1=rid1, rests2=rests2)
     return render_template("swipe.html", **context)
 
 # get restaurant profile page
