@@ -1,0 +1,49 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>Restaurants list</h1>
+  <table border = 1>
+  <thead><tr><th>rid</th><th>rname</th><tr><thead>
+  <tbody>
+    {% for row_index in range(result['name']|count) %}
+        <tr>
+          <td>{{ result['id'][row_index] }}</td>
+          <td>{{ result['name'][row_index] }}</td>
+        </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+
+  <form method="POST" action="/add_eaten">
+  <p>I have eaten there: </p>
+  <p>rid:
+  <input type="text" name="rid">
+  </p>
+  <p>score:
+  <input type="text" name="score">
+  </p>
+  <p>review:
+  <input type="text" name="review">
+  </p>
+  <input type="submit" value="add"></p>
+  </form>
+
+  <form method="POST" action="/add_eaten">
+  <p>I want to eat there: </p>
+  <p>rid:
+  <input type="text" name="rid">
+  </p>
+  <input type="submit" value="add"></p>
+  <form method="POST" action="/back">
+  <p><input type="submit" name="submit" value="Back">
+  </form>
+</body>
+
+</html>

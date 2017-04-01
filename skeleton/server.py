@@ -112,9 +112,45 @@ def another():
 def add():
   name = []
   name.append(request.form['name'])
-  g.conn.execute('INSERT INTO test(name) VALUES ?', name)
+  g.conn.execute('INSERT INTO test(name) VALUES %s', name)
   return redirect('/')
 
+@app.route('/add_eaten', methods=['POST'])
+def add_eaten():
+  rid = []
+  score = []
+  review = []
+  rid.append(request.form['rid'])
+  score.append(request.form['score'])
+  review.append(request.form['review'])
+  g.conn.execute('INSERT INTO test(name) VALUES %s', rid)
+  return redirect('/')
+
+@app.route('/add_marked', methods=['POST'])
+def add_marked():
+  rid = []
+  rid.append(request.form['rid'])
+  g.conn.execute('INSERT INTO test(name) VALUES %s', rid)
+  return redirect('/')
+
+
+@app.route('/food_profile', methods=['POST'])
+def food_profile():
+  error = None
+  context = dict(error = error)
+  rid = []
+  rname = []
+  cursor1 = g.conn.execute("SELECT R.rname FROM Restaurants R")
+  for result in cursor1:
+    rname.append(result)
+  cursor1.close()
+  cursor2 = g.conn.execute("SELECT R.rid FROM Restaurants R")
+  for result in cursor2:
+    rid.append(result)
+  cursor2.close()
+  context = dict(id = rid, name = rname)
+  print(context)
+  return render_template("food_profile.html", result=context)
 
 @app.route('/login',methods=['POST'])
 def login():
