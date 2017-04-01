@@ -220,7 +220,7 @@ def swipe():
     cursorLoc.close()
     otherUsersDisplay = [otherUsers[0][1], otherUsers[0][2], otherUsers[0][3], otherUsersLocation[0][0], otherUsersLocation[0][1], otherUsersLocation[0][2], otherUsersLocation[0][3]]
     
-    cursor2 = g.conn.execute("SELECT R.rname \
+    cursor2 = g.conn.execute("SELECT R.rname, A.score, A.review \
                              FROM restaurants R, ate A \
                              WHERE R.rid=A.rid AND A.uid=%s",\
                              str(randomNum))
@@ -250,8 +250,12 @@ def swipe():
 # get restaurant profile page
 @app.route('/restaurant', methods=['POST'])
 def restaurant():
-    cursor = g.conn.execute("SELECT * FROM restaurants R WHERE R.rname = %s", rests1[0])
+    isEatenOrMarked = request.form['submit']
+    if (isEatenOrMarked == "Check Eaten Restaurant"):
+        cursor = g.conn.execute("SELECT * FROM restaurants R WHERE R.rname = %s", rests1[0])
     print(rests1[0])
+    if (isEatenOrMarked == "Check Marked Restaurant"):
+        cursor = g.conn.execute("SELECT * FROM restaurants R WHERE R.rname = %s", rests2[0])
     information = []
     for result in cursor:
         for column in result:
@@ -263,6 +267,7 @@ def restaurant():
 def redirect_url(default='index'):
     return request.referrer 
   
+
 @app.route('/back', methods=['POST'])
 def back():
     
