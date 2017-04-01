@@ -24,13 +24,13 @@
   <form method="POST" action="/add_eaten">
   <p>I have eaten there: </p>
   <p>rid:
-  <input type="text" rid="rid">
+  <input type="text" name="rid">
   </p>
   <p>score:
-  <input type="text" score="score">
+  <input type="text" name="score">
   </p>
   <p>review:
-  <input type="text" review="review">
+  <input type="text" name="review">
   </p>
   <input type="submit" value="add"></p>
   </form>
@@ -42,10 +42,11 @@
   </p>
   <input type="submit" value="add"></p>
   </form>
-  
+
   <form method="POST" action="/back_to_personal_profile">
   <p><input type="submit" name="submit" value="Back to Person Profile">
-  </p></form>
+  </p>
+  </form>
 </body>
 
 </html>
