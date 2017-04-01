@@ -206,25 +206,66 @@ def swipe():
 #    isback = request.form['submit']
 #    if (isback == 'Back to swipe'):
 #        return redirect(url_for('swipe'))
-    randomNum = random.randint(1,9) + 10000
-    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
+#    randomNum = random.randint(1,9) + 10000
+#    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
 
-    global myInfo
-    myInfo = []
-    cursorMe = g.conn.execute("SELECT U.uid, U.name, U.date_of_birth, \
-                                      L.city, A.rid, M.rid\
-                              FROM Users U, Ate A, Marked M, Locations L \
-                              WHERE U.uid=A.uid AND A.uid=M.uid \
-                                    AND U.lid=L.lid AND U.uid=%s", myUid)
-    for result in cursorMe:
-        myInfo.append(result)
-    cursorMe.close()
-
-    #cursorTargetID = g.conn.execute("SELECT U.uid FROM Users U")
+    myEatenList = []
+    myMarkedList = []
     
-    
+    cursorMyCity = g.conn.execute("SELECT U.city \
+                                   FROM Users U \
+                                   WHERE U.uid=%s", myUid)
+    myCity = cursorMyCity.fetchone()[0];
+    cursorMyCity.close()
 
+    cursorMyEaten = g.conn.execute("SELECT A.rid \
+                                    FROM Ate A \
+                                    WHERE A.uid=%s", myUid)
+    for result in cursorMyEaten:
+        myEatenList.append(result)
+    cursorMyEaten.close()
 
+    cursorMyMarked = g.conn.execute("SELECT M.rid \
+                                     FROM Marked M \
+                                     WHERE M.uid=%s", myUid)
+    for result in cursorMyMarked:
+        myMarkedList.append(result)
+    cursorMyMarked.close()
+
+    while True:
+        cursorTargetID = g.conn.execute("SELECT U.uid FROM Users U \
+                                         WHERE U.city=%s \
+                                         ORDER BY RANDOM() \
+                                         LIMIT 1", myCity)
+        global targetID
+        targetID = cursorTargetID[0][0]
+        cursorTargetID.close()
+
+        targetEatenList = []
+        targetMarkedList = []
+        cursorTargetEaten = g.conn.execute("SELECT A.rid \
+                                            FROM Ate A \
+                                            WHERE A.uid=%s", targetID)
+        for result in cursorTargetEaten:
+            targetEatenList.append(result)
+        cursorTargetEaten.close()
+
+        cursorTargetMarked = g.conn.execute("SELECT M.rid \
+                                             FROM Marked M \
+                                             WHERE M.uid=%s", targetID)
+        for result in cursorTargetMarked:
+            targetMarkedList.append(result)
+        cursorTargetMarked.close()
+
+        if ((for myRow in myEatenList:
+                for targetRow in targetEatenList:
+                    targetRow == myRow) AND
+            (for myRow in myMarkedList:
+                for targetRow in targetMarkedList:
+                    targetRow == myRow)):
+            break
+
+    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", targetID)
     global otherUsers
     otherUsers = []
     otherUsersLocation = []
