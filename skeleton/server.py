@@ -235,9 +235,9 @@ def swipe():
     myEatenList = []
     myMarkedList = []
     
-    cursorMyCity = g.conn.execute("SELECT U.city \
-                                   FROM Users U \
-                                   WHERE U.uid=%s", myUid)
+    cursorMyCity = g.conn.execute("SELECT L.city \
+                                   FROM Users U, Locations L \
+                                   WHERE U.uid=%s AND U.lid=L.lid", myUid)
     myCity = cursorMyCity.fetchone()[0];
     cursorMyCity.close()
 
@@ -256,12 +256,16 @@ def swipe():
     cursorMyMarked.close()
 
     while True:
-        cursorTargetID = g.conn.execute("SELECT U.uid FROM Users U \
-                                         WHERE U.city=%s \
-                                         ORDER BY RANDOM() \
-                                         LIMIT 1", myCity)
         global targetID
-        targetID = cursorTargetID[0][0]
+        targetID = "fake"
+        cursorTargetID = g.conn.execute("SELECT U.uid \
+                                         FROM Users U, Locations L \
+                                         WHERE U.lid=L.lid AND L.city=%s \
+                                               AND U.uid!=%s\
+                                               AND U.uid!=%s\
+                                         ORDER BY RANDOM() \
+                                    LIMIT 1", myCity, myUid, targetID)
+        targetID = cursorTargetID.fetchone()[0]
         cursorTargetID.close()
 
         targetEatenList = []
@@ -280,12 +284,19 @@ def swipe():
             targetMarkedList.append(result)
         cursorTargetMarked.close()
 
-        if ((for myRow in myEatenList:
-                for targetRow in targetEatenList:
-                    targetRow == myRow) AND
-            (for myRow in myMarkedList:
-                for targetRow in targetMarkedList:
-                    targetRow == myRow)):
+        hasSameEaten = False
+        hasSameMarked = False
+
+        for myRow in myEatenList:
+            for targetRow in targetEatenList:
+                if (targetRow == myRow):
+                    hasSameEaten = True
+
+        for myRow in myMarkedList:
+            for targetRow in targetMarkedList:
+                if (targetRow == myRow):
+                    hasSameMarked = True
+        if ((hasSameEaten==True) and (hasSameMarked==True)):
             break
 
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", targetID)
@@ -314,21 +325,21 @@ def swipe():
     cur_rname = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, ate A \
                              WHERE R.rid=A.rid AND A.uid=%s",\
-                             str(randomNum))
+                             targetID)
     for result in cur_rname:
         rests1.append(result)
     cur_rname.close()
     
     cur_score = g.conn.execute("SELECT A.score FROM ate A \
                                 WHERE A.uid=%s",\
-                                str(randomNum))
+                                targetID)
     for result in cur_score:
         score1.append(result)
     cur_score.close()
     
     cur_review = g.conn.execute("SELECT A.review FROM ate A \
                                 WHERE A.uid=%s",\
-                                str(randomNum))
+                                targetID)
     for result in cur_review:
         review1.append(result)
     cur_review.close()
@@ -337,7 +348,7 @@ def swipe():
     cur_marked = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, marked M \
                              WHERE R.rid=M.rid AND M.uid=%s",\
-                             str(randomNum))
+                             targetID)
     for result in cur_marked:
         rests2.append(result)
     cur_marked.close()
