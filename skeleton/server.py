@@ -208,6 +208,23 @@ def swipe():
 #        return redirect(url_for('swipe'))
     randomNum = random.randint(1,9) + 10000
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
+
+    global myInfo
+    myInfo = []
+    cursorMe = g.conn.execute("SELECT U.uid, U.name, U.date_of_birth, \
+                                      L.city, A.rid, M.rid\
+                              FROM Users U, Ate A, Marked M, Locations L \
+                              WHERE U.uid=A.uid AND A.uid=M.uid \
+                                    AND U.lid=L.lid AND U.uid=%s", myUid)
+    for result in cursorMe:
+        myInfo.append(result)
+    cursorMe.close()
+
+    #cursorTargetID = g.conn.execute("SELECT U.uid FROM Users U")
+    
+    
+
+
     global otherUsers
     otherUsers = []
     otherUsersLocation = []
