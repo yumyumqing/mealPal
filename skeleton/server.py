@@ -149,6 +149,11 @@ def food_profile():
 @app.route('/login',methods=['POST'])
 def login():
     error = None
+    result1 = dict(error = error)
+    rests1 = []
+    score1 = []
+    review1 = []
+    rests2 = []
     global context
     context = dict(error = error)
     name =  request.form['name']
@@ -162,13 +167,21 @@ def login():
     cursor.close()
     context["data"] = information
     
-    cursor = g.conn.execute("SELECT R.rname, A.score, A.review FROM restaurants R, ate A, users U WHERE R.rid = A.rid AND A.uid = U.uid AND U.uid = %s", name)
-    information = []
-    for result in cursor:
-        for column in result:
-            information.append(column)
-    cursor.close()
-    context["eaten"] = information
+    cur_rname = g.conn.execute("SELECT R.rname FROM restaurants R, ate A WHERE R.rid = A.rid AND A.uid = %s", name)
+    for result in cur_rname:
+      rests1.append(result)
+    cur_rname.close()
+
+    cur_score = g.conn.execute("SELECT A.score FROM ate A WHERE A.uid=%s", name)
+    for result in cur_score:
+        score1.append(result)
+    cur_score.close()
+    
+    cur_review = g.conn.execute("SELECT A.review FROM ate A WHERE A.uid=%s", name)
+    for result in cur_review:
+        review1.append(result)
+    cur_review.close()
+    result1 = dict(rname = rests1, score = score1, review = review1)
 
     cursor = g.conn.execute("SELECT R.rname FROM restaurants R, marked M, users U WHERE R.rid = M.rid AND M.uid = U.uid AND U.uid = %s", name)
     information = []
@@ -177,7 +190,7 @@ def login():
             information.append(column)
     cursor.close()
     context["marked"] = information
-    return render_template("profile.html", **context)
+    return render_template("profile.html", result = result1, **context)
 
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
@@ -200,10 +213,12 @@ def swipe():
     otherUsersLocation = []
     otherUsersDisplay = []
     global rests1
+    error = None
+    result1 = dict(error = error)
     rests1 = []
-    rid1 = []
+    score1 = []
+    review1 = []
     rests2 = []
-    rid2 = []
     
     for result in cursor:
       otherUsers.append(result)  
@@ -214,42 +229,45 @@ def swipe():
         otherUsersLocation.append(result)
     cursorLoc.close()
     otherUsersDisplay = [otherUsers[0][1], otherUsers[0][2], otherUsers[0][3], otherUsersLocation[0][0], otherUsersLocation[0][1], otherUsersLocation[0][2], otherUsersLocation[0][3]]
-    
-    cursor2 = g.conn.execute("SELECT R.rname, A.score, A.review \
+
+    cur_rname = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, ate A \
                              WHERE R.rid=A.rid AND A.uid=%s",\
                              str(randomNum))
-    for result in cursor2:
+    for result in cur_rname:
         rests1.append(result)
-    cursor2.close()
+    cur_rname.close()
     
-    cursor2id = g.conn.execute("SELECT R.rid \
-                                FROM restaurants R, ate A \
-                                WHERE R.rid=A.rid AND A.uid=%s",\
+    cur_score = g.conn.execute("SELECT A.score FROM ate A \
+                                WHERE A.uid=%s",\
                                 str(randomNum))
-    for result in cursor2id:
-        rid1.append(result)
-    cursor2id.close()
-
-    cursor3 = g.conn.execute("SELECT R.rname \
+    for result in cur_score:
+        score1.append(result)
+    cur_score.close()
+    
+    cur_review = g.conn.execute("SELECT A.review FROM ate A \
+                                WHERE A.uid=%s",\
+                                str(randomNum))
+    for result in cur_review:
+        review1.append(result)
+    cur_review.close()
+    result1 = dict(name = rests1, score = score1, review = review1)
+    
+    cur_marked = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, marked M \
                              WHERE R.rid=M.rid AND M.uid=%s",\
                              str(randomNum))
-    for result in cursor3:
+    for result in cur_marked:
         rests2.append(result)
-    cursor3.close()
-    context = dict(data = otherUsersDisplay, rests1=rests1, rid1=rid1, rests2=rests2)
-    return render_template("swipe.html", **context)
+    cur_marked.close()
+    context = dict(data = otherUsersDisplay, rests2=rests2)
+    return render_template("swipe.html", result = result1, **context)
 
 # get restaurant profile page
 @app.route('/restaurant', methods=['POST'])
 def restaurant():
-    isEatenOrMarked = request.form['submit']
-    if (isEatenOrMarked == "Check Eaten Restaurant"):
-        cursor = g.conn.execute("SELECT * FROM restaurants R WHERE R.rname = %s", rests1[0])
+    cursor = g.conn.execute("SELECT * FROM restaurants R WHERE R.rname = %s", rests1[0])
     print(rests1[0])
-    if (isEatenOrMarked == "Check Marked Restaurant"):
-        cursor = g.conn.execute("SELECT * FROM restaurants R WHERE R.rname = %s", rests2[0])
     information = []
     for result in cursor:
         for column in result:
@@ -265,7 +283,6 @@ def redirect_url(default='index'):
 def back_to_personal_profile():
     return render_template("profile.html", **context)
   
-
 @app.route('/back', methods=['POST'])
 def back():   
     return render_template("swipe.html", **context)

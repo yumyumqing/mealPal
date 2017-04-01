@@ -1,7 +1,7 @@
 <html>
   <style>
     body{
-      font-size: 13pt;
+      font-size: 15pt;
       font-family: arial;
     }
   </style>
@@ -10,7 +10,7 @@
 <body>
   <h1>Restaurants list</h1>
   <table border = 1>
-  <thead><tr><th>Restaurant ID</th><th>Restaurant Name</th><tr><thead>
+  <thead><tr><th>Restaurant ID</th><th>Restaurant name</th><tr><thead>
   <tbody>
     {% for row_index in range(result['name']|count) %}
         <tr>
@@ -22,14 +22,15 @@
   </table>
 
   <form method="POST" action="/add_eaten">
-  <h4>I have eaten there: </h4>
-  <p>Restaurant ID:
-  <input type="text" name="rid">
-  Score (0-5):
-  <input type="text" name="score">
+  <p>I have eaten there: </p>
+  <p>rid:
+  <input type="text" rid="rid">
   </p>
-  <p>Review:
-  <input type="text" size="70" name="review">
+  <p>score:
+  <input type="text" score="score">
+  </p>
+  <p>review:
+  <input type="text" review="review">
   </p>
   <input type="submit" value="add"></p>
   </form>
@@ -41,7 +42,7 @@
   </p>
   <input type="submit" value="add"></p>
   </form>
-
+  
   <form method="POST" action="/back_to_personal_profile">
   <p><input type="submit" name="submit" value="Back to Person Profile">
   </p></form>
