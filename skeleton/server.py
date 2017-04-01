@@ -166,6 +166,8 @@ def swipe():
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
     global otherUsers
     otherUsers = []
+    otherUsersLocation = []
+    otherUsersDisplay = []
     global rests1
     rests1 = []
     rid1 = []
@@ -175,7 +177,13 @@ def swipe():
     for result in cursor:
       otherUsers.append(result)  
     cursor.close()
-
+    
+    cursorLoc = g.conn.execute("SELECT L.street_num, L.street, L.city, L.zip FROM locations L WHERE L.lid=%s", otherUsers[0][4])
+    for result in cursorLoc:
+        otherUsersLocation.append(result)
+    cursorLoc.close()
+    otherUsersDisplay = [otherUsers[0][1], otherUsers[0][2], otherUsers[0][3], otherUsersLocation[0][0], otherUsersLocation[0][1], otherUsersLocation[0][2], otherUsersLocation[0][3]]
+    
     cursor2 = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, ate A \
                              WHERE R.rid=A.rid AND A.uid=%s",\
@@ -200,7 +208,7 @@ def swipe():
         rests2.append(result)
     cursor3.close()
     global context
-    context = dict(data = otherUsers, rests1=rests1, rid1=rid1, rests2=rests2)
+    context = dict(data = otherUsersDisplay, rests1=rests1, rid1=rid1, rests2=rests2)
     return render_template("swipe.html", **context)
 
 # get restaurant profile page
