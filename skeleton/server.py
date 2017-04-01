@@ -118,15 +118,15 @@ def add_eaten():
   rid.append(request.form['rid'])
   score.append(request.form['score'])
   review.append(request.form['review'])
-  g.conn.execute('INSERT INTO test(name) VALUES %s', rid)
-  return redirect('/')
+  g.conn.execute('INSERT INTO ate(uid, rid, score, review) VALUES (%s, %s, %s, %s)', myUid, rid[0], score[0], review[0])
+  return render_template("food_profile.html", **context) 
 
 @app.route('/add_marked', methods=['POST'])
 def add_marked():
   rid = []
   rid.append(request.form['rid'])
-  g.conn.execute('INSERT INTO test(name) VALUES %s', rid)
-  return redirect('/')
+  g.conn.execute('INSERT INTO marked(uid, rid) VALUES (%s, %s)', myUid, rid[0])
+  return render_template("food_profile.html", **context)
 
 
 @app.route('/food_profile', methods=['POST'])
