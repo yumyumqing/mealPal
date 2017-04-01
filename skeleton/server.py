@@ -149,6 +149,7 @@ def food_profile():
 @app.route('/login',methods=['POST'])
 def login():
     error = None
+    global result1
     result1 = dict(error = error)
     rests1 = []
     score1 = []
@@ -281,7 +282,7 @@ def redirect_url(default='index'):
 
 @app.route('/back_to_personal_profile', methods=['POST'])
 def back_to_personal_profile():
-    return render_template("profile.html", **context)
+    return render_template("profile.html", result = result1, **context)
   
 @app.route('/back', methods=['POST'])
 def back():   
