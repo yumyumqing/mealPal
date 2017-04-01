@@ -91,17 +91,6 @@ def index():
   context = dict(data = names)
   return render_template("index.html", **context)
 
-@app.route('/another')
-def another():
-  cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid='10001' ")
-  information = []
-  for result in cursor:
-    information.append(result)  # can also be accessed using result[0]
-  cursor.close()
-  context = dict(data = information)
-  return render_template("another.html", **context)
-
-
 # Example of adding new data to the database
 @app.route('/add', methods=['POST'])
 def add():
@@ -146,6 +135,38 @@ def food_profile():
   all_rests = dict(id = rid, name = rname)
   return render_template("food_profile.html", result=all_rests)
 
+@app.route('/personal_profile', methods=['POST'])
+def personal_profile():
+  email = myUid
+  cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", myUid)
+  for result in cursor:
+    name = result[1]
+    gender = result[2]
+    DOB = result[3]
+    lid = result[4]
+  print(name)
+  return render_template("personal_profile.html", email=email,name=name,gender=gender,DOB=DOB,lid=lid)
+
+@app.route('/signup',methods=['POST'])
+def signup():
+    rests1 = []
+    score1 = []
+    review1 = []
+    rests2 = []
+    result1 = dict(rname = rests1, score = score1, review = review1)
+    email =  request.form['email']
+    myUid = email
+    name =  request.form['name']
+    g.conn.execute('INSERT INTO Users(uid, name, gender, date_of_birth, lid) VALUES (%s, %s, %s, %s, %s)', myUid, name, None, None, None)
+    cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = %s", myUid)
+    information = []
+    for result in cursor:
+        for column in result:
+            information.append(column)
+    cursor.close()
+    context["data"] = information
+    return render_template("profile.html", result = result1, **context)
+  
 @app.route('/login',methods=['POST'])
 def login():
     error = None
@@ -156,35 +177,36 @@ def login():
     review1 = []
     rests2 = []
     global context
-    context = dict(error = error)
-    name =  request.form['name']
     global myUid
-    myUid = name
-    cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = %s", name)
+    context = dict(error = error)
+    myUid =  request.form['name']
+    cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = %s", myUid)
     information = []
     for result in cursor:
         for column in result:
             information.append(column)
     cursor.close()
+    if len(information) == 0:
+      return render_template("signup.html", **context)
     context["data"] = information
     
-    cur_rname = g.conn.execute("SELECT R.rname FROM restaurants R, ate A WHERE R.rid = A.rid AND A.uid = %s", name)
+    cur_rname = g.conn.execute("SELECT R.rname FROM restaurants R, ate A WHERE R.rid = A.rid AND A.uid = %s", myUid)
     for result in cur_rname:
       rests1.append(result)
     cur_rname.close()
 
-    cur_score = g.conn.execute("SELECT A.score FROM ate A WHERE A.uid=%s", name)
+    cur_score = g.conn.execute("SELECT A.score FROM ate A WHERE A.uid=%s", myUid)
     for result in cur_score:
         score1.append(result)
     cur_score.close()
     
-    cur_review = g.conn.execute("SELECT A.review FROM ate A WHERE A.uid=%s", name)
+    cur_review = g.conn.execute("SELECT A.review FROM ate A WHERE A.uid=%s", myUid)
     for result in cur_review:
         review1.append(result)
     cur_review.close()
     result1 = dict(rname = rests1, score = score1, review = review1)
 
-    cursor = g.conn.execute("SELECT R.rname FROM restaurants R, marked M, users U WHERE R.rid = M.rid AND M.uid = U.uid AND U.uid = %s", name)
+    cursor = g.conn.execute("SELECT R.rname FROM restaurants R, marked M, users U WHERE R.rid = M.rid AND M.uid = U.uid AND U.uid = %s", myUid)
     information = []
     for result in cursor:
         for column in result:
