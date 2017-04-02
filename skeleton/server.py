@@ -178,6 +178,9 @@ def login():
     rests2 = []
     global context
     global myUid
+    global targetID
+    targetID = "fake"
+
     context = dict(error = error)
     myUid =  request.form['name']
     cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = %s", myUid)
@@ -256,8 +259,6 @@ def swipe():
     cursorMyMarked.close()
 
     while True:
-        global targetID
-        targetID = "fake"
         cursorTargetID = g.conn.execute("SELECT U.uid \
                                          FROM Users U, Locations L \
                                          WHERE U.lid=L.lid AND L.city=%s \
