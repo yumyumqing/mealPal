@@ -205,7 +205,11 @@ def change_location():
 
 @app.route('/send_request',methods=['POST'])
 def send_request():
-    return render_template("request.html", **context)
+    liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", targetID, myUid)
+    isLiked = (liker_uid.fetchone()[0] == 1)
+    if (isLiked):
+        return render_template("request.html", **context)
+    return render_template("notMatched.html")
 
 @app.route('/signup',methods=['POST'])
 def signup():
