@@ -99,22 +99,37 @@ def add():
   g.conn.execute('INSERT INTO test(name) VALUES %s', name)
   return redirect('/')
 
+@app.route('/see_request', methods=['POST'])
+def see_request():
+  your_request = []
+  cursor =  g.conn.execute('SELECT * FROM requests Re WHERE Re.accepted_uid = %s', myUid)
+  for item in cursor:
+    your_request.append(item)
+  cursor.close()
+  return render_template('see_request.html',your_request=your_request)
+
 @app.route('/add_eaten', methods=['POST'])
 def add_eaten():
-  rid = []
-  score = []
-  review = []
-  rid.append(request.form['rid'])
-  score.append(request.form['score'])
-  review.append(request.form['review'])
-  g.conn.execute('INSERT INTO ate(uid, rid, score, review) VALUES (%s, %s, %s, %s)', myUid, rid[0], score[0], review[0])
+  rid = request.form['rid']
+  score = request.form['score']
+  review = request.form['review']
+  cursor =  g.conn.execute('SELECT R.rname FROM restaurants R WHERE R.rid = %s', rid)
+  for result in cursor:
+    rests1.append(result)
+  cursor.close()
+  score1.append(score)
+  review1.append(review)
+  g.conn.execute('INSERT INTO ate(uid, rid, score, review) VALUES (%s, %s, %s, %s)', myUid, rid, score, review)
   return render_template("food_profile.html", result=all_rests)
 
 @app.route('/add_marked', methods=['POST'])
 def add_marked():
-  rid = []
-  rid.append(request.form['rid'])
-  g.conn.execute('INSERT INTO marked(uid, rid) VALUES (%s, %s)', myUid, rid[0])
+  mark_rid=request.form['rid']
+  cursor =  g.conn.execute('SELECT R.rname FROM restaurants R WHERE R.rid = %s', mark_rid)
+  for result in cursor:
+    user_marked.append(result)
+  cursor.close()
+  g.conn.execute('INSERT INTO marked(uid, rid) VALUES (%s, %s)', myUid, mark_rid)
   return render_template("food_profile.html", result=all_rests)
 
 @app.route('/food_profile', methods=['POST'])
@@ -194,6 +209,7 @@ def signup():
     user_info['gender'] = None
     user_info['DOB'] = None
     user_info['lid'] = None
+    g.conn.execute("INSERT INTO Users(uid, name, gender, date_of_birth, lid) VALUES (%s, %s, %s, %s, %s)",user_info['email'],user_info['email'],None, None, None)
     return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked,user_info=user_info)
   
 @app.route('/login',methods=['POST'])
@@ -203,8 +219,11 @@ def login():
     global lid_start
     lid_start = 30000
     user_eaten = dict(error = error)
+    global rests1
     rests1 = []
+    global score1
     score1 = []
+    global review1
     review1 = []
     global user_marked
     user_marked = []

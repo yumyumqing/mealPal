@@ -18,6 +18,10 @@
   <p> Date of birth: {{user_info['DOB']}} </p>
   <p> Location: {{user_info['lid']}} </p>
 
+  <form method="POST" action="/see_request">
+      <p><input type="submit" name="submit" value="see all the request sent to you"></p>
+  </form>
+
   <form method="POST" action="/food_profile">
       <p><input type="submit" name="submit" value="Edit food profile"></p>
   </form>
