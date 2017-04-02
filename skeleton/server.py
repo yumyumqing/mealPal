@@ -441,7 +441,8 @@ def send():
     month = int(request.form['month'])
     day = int(request.form['day'])
     g.conn.execute("INSERT INTO Requests(send_uid,accepted_uid,date,contact_info) VALUES (%s,%s,ARRAY[%s,%s,%s],%s)", myUid, targetID, year, month, day, contactInfo)
-    return render_template("swipe.html",otherUser_eaten = otherUser_eaten, otherUsersDisplay = otherUsersDisplay,otherUser_marked=otherUser_marked)
+    return render_template("successSent.html")
+#    return render_template("swipe.html",otherUser_eaten = otherUser_eaten, otherUsersDisplay = otherUsersDisplay,otherUser_marked=otherUser_marked)
 
 
 # get restaurant profile page
