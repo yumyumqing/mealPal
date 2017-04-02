@@ -220,8 +220,6 @@ def login():
     rests2 = []
     global context
     global myUid
-    global targetID
-    targetID = "fake"
 
     context = dict(error = error)
     myUid =  request.form['name']
@@ -263,6 +261,9 @@ def login():
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
 def swipe():
+    global targetID
+    targetID = "fake"
+
     isLike = request.form['submit']
     if (isLike == 'Yes'):
         print('like')
