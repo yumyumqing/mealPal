@@ -8,18 +8,19 @@
 
 
 <body>
-  <p> email: {{user_info['email']}} </p>
+  <p> Email: {{user_info['email']}} </p>
   <form method="POST" action="/change_name">
-  <p> name: {{user_info['name']}} <input type="text" name="name"> <input type="submit" value="change"></p>
+  <p> Name: {{user_info['name']}} <input type="text" name="name"> <input type="submit" value="change"></p>
   </form>
   <form method="POST" action="/change_gender">
-  <p> gender: {{user_info['gender']}} <input type="text" name="gender"> <input type="submit" value="change"></p>
+  <p> Gender: {{user_info['gender']}} <input type="text" name="gender"> <input type="submit" value="change"></p>
   </form>
   <form method="POST" action="/change_DOB">
-  <p> date of birth: {{user_info['DOB']}} <input type="text" name="DOB"> <input type="submit" value="change"></p>
+  <p> Date of birth: {{user_info['DOB']}} </p>
+  <p> Month: <input type="text" name="month"> Day: <input type="text" name="day"> Year: <input type="text" name="year"><input type="submit" value="change"></p>
   </form>
   <form method="POST" action="/change_location">
-  <p> location: {{user_info['lid']}} <input type="text" name="lid"> <input type="submit" value="change"></p>
+  <p> Location: {{user_info['lid']}} <input type="text" name="lid"> <input type="submit" value="change"></p>
   </form>
   <form method="POST" action="/back_to_personal_profile">
   <p><input type="submit" name="submit" value="Back to Profile">
