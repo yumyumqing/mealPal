@@ -167,13 +167,12 @@ def change_gender():
 @app.route('/change_DOB', methods=['POST'])
 def change_DOB():
   DOB = []
-  month=request.form['month']
-  day=request.form['day']
-  year=request.form['year']
+  month=int(request.form['month'])
+  day=int(request.form['day'])
+  year=int(request.form['year'])
   DOB = [year, month, day]
   print(DOB)
-  DOB_string = '{'+year+','+month+','+day+'}'
-  g.conn.execute('UPDATE Users SET date_of_birth = %s WHERE uid = %s', DOB_string, myUid)
+  g.conn.execute('UPDATE Users SET date_of_birth = ARRAY[%s,%s,%s] WHERE uid = %s', year, month, day, myUid)
   user_info['DOB'] = DOB
   return render_template("personal_profile.html", user_info=user_info)
 
@@ -221,8 +220,6 @@ def login():
     rests2 = []
     global context
     global myUid
-    global targetID
-    targetID = "fake"
 
     context = dict(error = error)
     myUid =  request.form['name']
@@ -264,6 +261,9 @@ def login():
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
 def swipe():
+    global targetID
+    targetID = "fake"
+
     isLike = request.form['submit']
     if (isLike == 'Yes'):
         print('like')
@@ -351,6 +351,7 @@ def swipe():
     otherUsersDisplay = []
     global rests1
     error = None
+    global result1
     result1 = dict(error = error)
     rests1 = []
     score1 = []
@@ -398,6 +399,17 @@ def swipe():
         rests2.append(result)
     cur_marked.close()
     context = dict(data = otherUsersDisplay, rests2=rests2)
+    return render_template("swipe.html", result = result1, **context)
+
+# actually send the request after input contact info and date
+@app.route('/send', methods=['POST'])
+def send():
+    contactInfo = request.form['contact']
+    print(contactInfo)
+    year = int(request.form['year'])
+    month = int(request.form['month'])
+    day = int(request.form['day'])
+    g.conn.execute("INSERT INTO Requests(send_uid,accepted_uid,date,contact_info) VALUES (%s,%s,ARRAY[%s,%s,%s],%s)", myUid, targetID, year, month, day, contactInfo)
     return render_template("swipe.html", result = result1, **context)
 
 # get restaurant profile page
