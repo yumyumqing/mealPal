@@ -139,13 +139,50 @@ def food_profile():
 def personal_profile():
   email = myUid
   cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", myUid)
+  global user_info
+  error = None
+  user_info = dict(error = error)
+  user_info['email'] = myUid
   for result in cursor:
-    name = result[1]
-    gender = result[2]
-    DOB = result[3]
-    lid = result[4]
-  print(name)
-  return render_template("personal_profile.html", email=email,name=name,gender=gender,DOB=DOB,lid=lid)
+    user_info['name'] = result[1]
+    user_info['gender'] = result[2]
+    user_info['DOB'] = result[3]
+    user_info['lid'] = result[4]
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/change_name', methods=['POST'])
+def change_name():
+  name=request.form['name']
+  g.conn.execute('UPDATE Users SET name = %s WHERE uid = %s', name, myUid)
+  user_info['name'] = name
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/change_gender', methods=['POST'])
+def change_gender():
+  gender=request.form['gender']
+  g.conn.execute('UPDATE Users SET gender = %s WHERE uid = %s', gender, myUid)
+  user_info['gender'] = gender
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/change_DOB', methods=['POST'])
+def change_DOB():
+  DOB=request.form['DOB']
+  g.conn.execute('UPDATE Users SET DOB = %s WHERE uid = %s', DOB, myUid)
+  user_info['DOB'] = DOB
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/change_lid', methods=['POST'])
+def change_lid():
+  lid=request.form['lid']
+  print(lid)
+  g.conn.execute('UPDATE Users SET lid = %s WHERE uid = %s', lid, myUid)
+  user_info['lid'] = lid
+  print(user_info)
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/send_request',methods=['POST'])
+def send_request():
+    return render_template("request.html", **context)
 
 @app.route('/signup',methods=['POST'])
 def signup():
@@ -229,77 +266,8 @@ def swipe():
 #    isback = request.form['submit']
 #    if (isback == 'Back to swipe'):
 #        return redirect(url_for('swipe'))
-#    randomNum = random.randint(1,9) + 10000
-#    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
-
-    myEatenList = []
-    myMarkedList = []
-    
-    cursorMyCity = g.conn.execute("SELECT L.city \
-                                   FROM Users U, Locations L \
-                                   WHERE U.uid=%s AND U.lid=L.lid", myUid)
-    myCity = cursorMyCity.fetchone()[0];
-    cursorMyCity.close()
-
-    cursorMyEaten = g.conn.execute("SELECT A.rid \
-                                    FROM Ate A \
-                                    WHERE A.uid=%s", myUid)
-    for result in cursorMyEaten:
-        myEatenList.append(result)
-    cursorMyEaten.close()
-
-    cursorMyMarked = g.conn.execute("SELECT M.rid \
-                                     FROM Marked M \
-                                     WHERE M.uid=%s", myUid)
-    for result in cursorMyMarked:
-        myMarkedList.append(result)
-    cursorMyMarked.close()
-
-    while True:
-        global targetID
-        targetID = "fake"
-        cursorTargetID = g.conn.execute("SELECT U.uid \
-                                         FROM Users U, Locations L \
-                                         WHERE U.lid=L.lid AND L.city=%s \
-                                               AND U.uid!=%s\
-                                               AND U.uid!=%s\
-                                         ORDER BY RANDOM() \
-                                    LIMIT 1", myCity, myUid, targetID)
-        targetID = cursorTargetID.fetchone()[0]
-        cursorTargetID.close()
-
-        targetEatenList = []
-        targetMarkedList = []
-        cursorTargetEaten = g.conn.execute("SELECT A.rid \
-                                            FROM Ate A \
-                                            WHERE A.uid=%s", targetID)
-        for result in cursorTargetEaten:
-            targetEatenList.append(result)
-        cursorTargetEaten.close()
-
-        cursorTargetMarked = g.conn.execute("SELECT M.rid \
-                                             FROM Marked M \
-                                             WHERE M.uid=%s", targetID)
-        for result in cursorTargetMarked:
-            targetMarkedList.append(result)
-        cursorTargetMarked.close()
-
-        hasSameEaten = False
-        hasSameMarked = False
-
-        for myRow in myEatenList:
-            for targetRow in targetEatenList:
-                if (targetRow == myRow):
-                    hasSameEaten = True
-
-        for myRow in myMarkedList:
-            for targetRow in targetMarkedList:
-                if (targetRow == myRow):
-                    hasSameMarked = True
-        if ((hasSameEaten==True) and (hasSameMarked==True)):
-            break
-
-    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", targetID)
+    randomNum = random.randint(1,9) + 10000
+    cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", str(randomNum))
     global otherUsers
     otherUsers = []
     otherUsersLocation = []
@@ -325,21 +293,21 @@ def swipe():
     cur_rname = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, ate A \
                              WHERE R.rid=A.rid AND A.uid=%s",\
-                             targetID)
+                             str(randomNum))
     for result in cur_rname:
         rests1.append(result)
     cur_rname.close()
     
     cur_score = g.conn.execute("SELECT A.score FROM ate A \
                                 WHERE A.uid=%s",\
-                                targetID)
+                                str(randomNum))
     for result in cur_score:
         score1.append(result)
     cur_score.close()
     
     cur_review = g.conn.execute("SELECT A.review FROM ate A \
                                 WHERE A.uid=%s",\
-                                targetID)
+                                str(randomNum))
     for result in cur_review:
         review1.append(result)
     cur_review.close()
@@ -348,7 +316,7 @@ def swipe():
     cur_marked = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, marked M \
                              WHERE R.rid=M.rid AND M.uid=%s",\
-                             targetID)
+                             str(randomNum))
     for result in cur_marked:
         rests2.append(result)
     cur_marked.close()
