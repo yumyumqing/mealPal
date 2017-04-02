@@ -214,8 +214,7 @@ def signup():
     cursor2.close()
     information[4] = locationStr1
 
-    context["data"] = information
-    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, **context)
+    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked)
   
 @app.route('/login',methods=['POST'])
 def login():
@@ -234,6 +233,14 @@ def login():
     global user_info
     user_info = dict(error = error)
     myUid =  request.form['name']
+
+    cursorCheck = g.conn.execute("SELECT COUNT(*) FROM users U\
+                                  WHERE U.uid=%s", myUid)
+    isExist = cursorCheck.fetchone()[0]
+    cursorCheck.close()
+    if (isExist < 1):
+        return render_template("signup.html")
+
     cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = %s", myUid)
     user_info['email'] = myUid
     for result in cursor:
