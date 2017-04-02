@@ -166,13 +166,18 @@ def change_gender():
 
 @app.route('/change_DOB', methods=['POST'])
 def change_DOB():
-  DOB=request.form['DOB']
-  g.conn.execute('UPDATE Users SET DOB = %s WHERE uid = %s', DOB, myUid)
+  DOB = []
+  month=request.form['month']
+  day=request.form['day']
+  year=request.form['year']
+  DOB = [year, month, day]
+  print(DOB)
+  g.conn.execute('UPDATE Users SET date_of_birth = %r WHERE uid = %s', tuple(DOB), myUid)
   user_info['DOB'] = DOB
   return render_template("personal_profile.html", user_info=user_info)
 
-@app.route('/change_lid', methods=['POST'])
-def change_lid():
+@app.route('/change_location', methods=['POST'])
+def change_location():
   lid=request.form['lid']
   print(lid)
   g.conn.execute('UPDATE Users SET lid = %s WHERE uid = %s', lid, myUid)
