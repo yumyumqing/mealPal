@@ -178,8 +178,13 @@ def change_DOB():
 
 @app.route('/change_location', methods=['POST'])
 def change_location():
-  lid=request.form['lid']
-  print(lid)
+  city=request.form['city']
+  street=request.form['street']
+  street_num=request.form['street_num']
+  zip_code=request.form['zip_code']
+  count = g.conn.execute("SELECT COUNT(*) FROM locations").fetchone()[0]
+  lid = str(lid_start + count + 1)
+  g.conn.execute('INSERT INTO locations(lid, city, street, street_num, zip) VALUES (%s, %s, %s, %s, %s)', lid, city,street, street_num, zip_code)
   g.conn.execute('UPDATE Users SET lid = %s WHERE uid = %s', lid, myUid)
   user_info['lid'] = lid
   print(user_info)
@@ -213,6 +218,8 @@ def signup():
 def login():
     error = None
     global result1
+    global lid_start
+    lid_start = 30000
     result1 = dict(error = error)
     rests1 = []
     score1 = []
