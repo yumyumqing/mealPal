@@ -139,13 +139,50 @@ def food_profile():
 def personal_profile():
   email = myUid
   cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", myUid)
+  global user_info
+  error = None
+  user_info = dict(error = error)
+  user_info['email'] = myUid
   for result in cursor:
-    name = result[1]
-    gender = result[2]
-    DOB = result[3]
-    lid = result[4]
-  print(name)
-  return render_template("personal_profile.html", email=email,name=name,gender=gender,DOB=DOB,lid=lid)
+    user_info['name'] = result[1]
+    user_info['gender'] = result[2]
+    user_info['DOB'] = result[3]
+    user_info['lid'] = result[4]
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/change_name', methods=['POST'])
+def change_name():
+  name=request.form['name']
+  g.conn.execute('UPDATE Users SET name = %s WHERE uid = %s', name, myUid)
+  user_info['name'] = name
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/change_gender', methods=['POST'])
+def change_gender():
+  gender=request.form['gender']
+  g.conn.execute('UPDATE Users SET gender = %s WHERE uid = %s', gender, myUid)
+  user_info['gender'] = gender
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/change_DOB', methods=['POST'])
+def change_DOB():
+  DOB=request.form['DOB']
+  g.conn.execute('UPDATE Users SET DOB = %s WHERE uid = %s', DOB, myUid)
+  user_info['DOB'] = DOB
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/change_lid', methods=['POST'])
+def change_lid():
+  lid=request.form['lid']
+  print(lid)
+  g.conn.execute('UPDATE Users SET lid = %s WHERE uid = %s', lid, myUid)
+  user_info['lid'] = lid
+  print(user_info)
+  return render_template("personal_profile.html", user_info=user_info)
+
+@app.route('/send_request',methods=['POST'])
+def send_request():
+    return render_template("request.html", **context)
 
 @app.route('/signup',methods=['POST'])
 def signup():
@@ -301,6 +338,7 @@ def swipe():
             break
 
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", targetID)
+    
     global otherUsers
     otherUsers = []
     otherUsersLocation = []
