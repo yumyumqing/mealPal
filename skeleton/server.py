@@ -167,12 +167,12 @@ def change_gender():
 @app.route('/change_DOB', methods=['POST'])
 def change_DOB():
   DOB = []
-  month=request.form['month']
-  day=request.form['day']
-  year=request.form['year']
+  month=int(request.form['month'])
+  day=int(request.form['day'])
+  year=int(request.form['year'])
   DOB = [year, month, day]
   print(DOB)
-  g.conn.execute('UPDATE Users SET date_of_birth = %r WHERE uid = %s', tuple(DOB), myUid)
+  g.conn.execute('UPDATE Users SET date_of_birth = ARRAY[%s,%s,%s] WHERE uid = %s', year, month, day, myUid)
   user_info['DOB'] = DOB
   return render_template("personal_profile.html", user_info=user_info)
 
@@ -399,6 +399,17 @@ def swipe():
     cur_marked.close()
     context = dict(data = otherUsersDisplay, rests2=rests2)
     return render_template("swipe.html", result = result1, **context)
+
+# actually send the request after input contact info and date
+@app.route('/send', methods=['POST'])
+def send():
+    contactInfo = request.form['contact']
+    print(contactInfo)
+    year = int(request.form['year'])
+    month = int(request.form['month'])
+    day = int(request.form['day'])
+    g.conn.execute("INSERT INTO Requests(send_uid,accepted_uid,date,contact_info) VALUES (%s,%s,ARRAY[%s,%s,%s],%s)", myUid, targetID, year, month, day, contactInfo)
+    return render_template("swipe.html", **context)
 
 # get restaurant profile page
 @app.route('/restaurant', methods=['POST'])
