@@ -192,19 +192,15 @@ def change_location():
 
 @app.route('/send_request',methods=['POST'])
 def send_request():
-    liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", targetID, myUid)
-    isLiked = (liker_uid.fetchone()[0] == 1)
-    if (isLiked):
-        return render_template("request.html", **context)
-    return render_template("notMatched.html")
+    return render_template("request.html", **context)
 
 @app.route('/signup',methods=['POST'])
 def signup():
     rests1 = []
     score1 = []
     review1 = []
-    rests2 = []
-    result1 = dict(rname = rests1, score = score1, review = review1)
+    user_marked = []
+    user_eaten = dict(rname = rests1, score = score1, review = review1)
     email =  request.form['email']
     myUid = email
     name =  request.form['name']
@@ -216,19 +212,20 @@ def signup():
             information.append(column)
     cursor.close()
     context["data"] = information
-    return render_template("profile.html", result = result1, **context)
+    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, **context)
   
 @app.route('/login',methods=['POST'])
 def login():
     error = None
-    global result1
+    global user_eaten
     global lid_start
     lid_start = 30000
-    result1 = dict(error = error)
+    user_eaten = dict(error = error)
     rests1 = []
     score1 = []
     review1 = []
-    rests2 = []
+    global user_marked
+    user_marked = []
     global context
     global myUid
 
@@ -258,28 +255,28 @@ def login():
     for result in cur_review:
         review1.append(result)
     cur_review.close()
-    result1 = dict(rname = rests1, score = score1, review = review1)
+    user_eaten = dict(rname = rests1, score = score1, review = review1)
 
     cursor = g.conn.execute("SELECT R.rname FROM restaurants R, marked M, users U WHERE R.rid = M.rid AND M.uid = U.uid AND U.uid = %s", myUid)
-    information = []
     for result in cursor:
         for column in result:
-            information.append(column)
+            user_marked.append(column)
     cursor.close()
-    context["marked"] = information
-    return render_template("profile.html", result = result1, **context)
+    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, **context)
 
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
 def swipe():
-    
+    global targetID
+    targetID = "fake"
+
     isLike = request.form['submit']
     if (isLike == 'Yes'):
         print('like')
-        liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", myUid, targetID)
+        liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", myUid, otherUsers[0][0])
         likeNotExists = (liker_uid.fetchone()[0] == 0)
         if likeNotExists:
-            g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES (%s,%s)", myUid, targetID)
+            g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES (%s,%s)", myUid, otherUsers[0][0])
 
 #    isback = request.form['submit']
 #    if (isback == 'Back to swipe'):
@@ -311,9 +308,6 @@ def swipe():
     cursorMyMarked.close()
 
     while True:
-        global targetID
-        targetID = "fake"
-
         cursorTargetID = g.conn.execute("SELECT U.uid \
                                          FROM Users U, Locations L \
                                          WHERE U.lid=L.lid AND L.city=%s \
@@ -360,15 +354,17 @@ def swipe():
     global otherUsers
     otherUsers = []
     otherUsersLocation = []
+    global otherUsersDisplay
     otherUsersDisplay = []
     global rests1
     error = None
-    global result1
-    result1 = dict(error = error)
+    global otherUser_eaten
+    otherUser_eaten = dict(error = error)
     rests1 = []
     score1 = []
     review1 = []
-    rests2 = []
+    global otherUser_marked
+    otherUser_marked = []
     
     for result in cursor:
       otherUsers.append(result)  
@@ -401,17 +397,16 @@ def swipe():
     for result in cur_review:
         review1.append(result)
     cur_review.close()
-    result1 = dict(name = rests1, score = score1, review = review1)
+    otherUser_eaten = dict(name = rests1, score = score1, review = review1)
     
     cur_marked = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, marked M \
                              WHERE R.rid=M.rid AND M.uid=%s",\
                              targetID)
     for result in cur_marked:
-        rests2.append(result)
+        otherUser_marked.append(result)
     cur_marked.close()
-    context = dict(data = otherUsersDisplay, rests2=rests2)
-    return render_template("swipe.html", result = result1, **context)
+    return render_template("swipe.html", otherUser_eaten = otherUser_eaten, otherUsersDisplay = otherUsersDisplay,otherUser_marked=otherUser_marked)
 
 # actually send the request after input contact info and date
 @app.route('/send', methods=['POST'])
@@ -422,7 +417,8 @@ def send():
     month = int(request.form['month'])
     day = int(request.form['day'])
     g.conn.execute("INSERT INTO Requests(send_uid,accepted_uid,date,contact_info) VALUES (%s,%s,ARRAY[%s,%s,%s],%s)", myUid, targetID, year, month, day, contactInfo)
-    return render_template("swipe.html", result = result1, **context)
+    return render_template("swipe.html",otherUser_eaten = otherUser_eaten, otherUsersDisplay = otherUsersDisplay,otherUser_marked=otherUser_marked)
+
 
 # get restaurant profile page
 @app.route('/restaurant', methods=['POST'])
@@ -442,11 +438,11 @@ def redirect_url(default='index'):
 
 @app.route('/back_to_personal_profile', methods=['POST'])
 def back_to_personal_profile():
-    return render_template("profile.html", result = result1, **context)
+    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, **context)
   
 @app.route('/back', methods=['POST'])
 def back():   
-    return render_template("swipe.html", **context)
+    return render_template("swipe.html", otherUser_eaten = otherUser_eaten, otherUsersDisplay = otherUsersDisplay,otherUser_marked=otherUser_marked)
 
 if __name__ == "__main__":
   import click
