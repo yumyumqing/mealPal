@@ -148,6 +148,19 @@ def personal_profile():
     user_info['gender'] = result[2]
     user_info['DOB'] = result[3]
     user_info['lid'] = result[4]
+  cursor.close();
+  cursor2 = g.conn.execute("SELECT L.street_num, L.street, L.city, L.zip\
+                            FROM Locations L\
+                            WHERE L.lid=%s", user_info['lid'])
+  locationStr = ""
+  for result in cursor2:
+      locationStr = locationStr + result[0]
+      locationStr = locationStr + result[1]
+      locationStr = locationStr + result[2]
+      locationStr = locationStr + str(result[3])
+  cursor2.close()
+  user_info['lid'] = locationStr
+
   return render_template("personal_profile.html", user_info=user_info)
 
 @app.route('/change_name', methods=['POST'])
@@ -215,6 +228,20 @@ def signup():
         for column in result:
             information.append(column)
     cursor.close()
+
+    cursor2 = g.conn.execute("SELECT L.street_num, L.street, \
+                                     L.city, L.zip\
+                              FROM Locations L\
+                              WHERE L.lid=%s", str(information[4]))
+    locationStr1 = ""
+    for result in cursor2:
+        locationStr1 = locationStr1 + result[0]
+        locationStr1 = locationStr1 + result[1]
+        locationStr1 = locationStr1 + result[2]
+        locationStr1 = locationStr1 + str(result[3])
+    cursor2.close()
+    information[4] = locationStr1
+
     context["data"] = information
     return render_template("profile.html", result = result1, **context)
   
