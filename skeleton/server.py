@@ -137,30 +137,6 @@ def food_profile():
 
 @app.route('/personal_profile', methods=['POST'])
 def personal_profile():
-  email = myUid
-  cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", myUid)
-  global user_info
-  error = None
-  user_info = dict(error = error)
-  user_info['email'] = myUid
-  for result in cursor:
-    user_info['name'] = result[1]
-    user_info['gender'] = result[2]
-    user_info['DOB'] = result[3]
-    user_info['lid'] = result[4]
-  cursor.close();
-  cursor2 = g.conn.execute("SELECT L.street_num, L.street, L.city, L.zip\
-                            FROM Locations L\
-                            WHERE L.lid=%s", user_info['lid'])
-  locationStr = ""
-  for result in cursor2:
-      locationStr = locationStr + result[0]
-      locationStr = locationStr + result[1]
-      locationStr = locationStr + result[2]
-      locationStr = locationStr + str(result[3])
-  cursor2.close()
-  user_info['lid'] = locationStr
-
   return render_template("personal_profile.html", user_info=user_info)
 
 @app.route('/change_name', methods=['POST'])
@@ -199,7 +175,7 @@ def change_location():
   lid = str(lid_start + count + 1)
   g.conn.execute('INSERT INTO locations(lid, city, street, street_num, zip) VALUES (%s, %s, %s, %s, %s)', lid, city,street, street_num, zip_code)
   g.conn.execute('UPDATE Users SET lid = %s WHERE uid = %s', lid, myUid)
-  user_info['lid'] = lid
+  user_info['lid'] = street_num+" "+street+" "+city+" "+zip_code
   print(user_info)
   return render_template("personal_profile.html", user_info=user_info)
 
@@ -253,21 +229,31 @@ def login():
     review1 = []
     global user_marked
     user_marked = []
-    global context
+    global user_info
     global myUid
-
-    context = dict(error = error)
+    global user_info
+    user_info = dict(error = error)
     myUid =  request.form['name']
     cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = %s", myUid)
-    information = []
+    user_info['email'] = myUid
     for result in cursor:
-        for column in result:
-            information.append(column)
+      user_info['name'] = result[1]
+      user_info['gender'] = result[2]
+      user_info['DOB'] = result[3]
+      user_info['lid'] = result[4]
     cursor.close()
-    if len(information) == 0:
-      return render_template("signup.html", **context)
-    context["data"] = information
-    
+
+    cursor2 = g.conn.execute("SELECT L.street_num, L.street, L.city, L.zip\
+                            FROM Locations L\
+                            WHERE L.lid=%s", user_info['lid'])
+    locationStr = ""
+    for result in cursor2:
+      locationStr = locationStr + result[0]
+      locationStr = locationStr + result[1]
+      locationStr = locationStr + result[2]
+      locationStr = locationStr + str(result[3])
+    cursor2.close()
+    user_info['lid'] = locationStr
     cur_rname = g.conn.execute("SELECT R.rname FROM restaurants R, ate A WHERE R.rid = A.rid AND A.uid = %s", myUid)
     for result in cur_rname:
       rests1.append(result)
@@ -289,7 +275,7 @@ def login():
         for column in result:
             user_marked.append(column)
     cursor.close()
-    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, **context)
+    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
 
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
@@ -465,7 +451,7 @@ def redirect_url(default='index'):
 
 @app.route('/back_to_personal_profile', methods=['POST'])
 def back_to_personal_profile():
-    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, **context)
+    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
   
 @app.route('/back', methods=['POST'])
 def back():   

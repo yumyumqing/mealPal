@@ -8,16 +8,15 @@
 
 
 <body>
-  <h1>Name</h1>
+  <h1>Profile</h1>
   <form method="POST" action="/personal_profile">
       <p><input type="submit" name="submit" value="Edit personal profile"></p>
   </form>
-
-  <div>
-    {% for n in data %}
-    <div>{{n}}</div>
-    {% endfor %}
-  </div>
+  <p> Email: {{user_info['email']}} </p>
+  <p> Name: {{user_info['name']}} </p>
+  <p> Gender: {{user_info['gender']}} </p>
+  <p> Date of birth: {{user_info['DOB']}} </p>
+  <p> Location: {{user_info['lid']}} </p>
 
   <form method="POST" action="/food_profile">
       <p><input type="submit" name="submit" value="Edit food profile"></p>
