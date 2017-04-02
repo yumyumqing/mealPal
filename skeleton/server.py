@@ -185,36 +185,12 @@ def send_request():
 
 @app.route('/signup',methods=['POST'])
 def signup():
-    rests1 = []
-    score1 = []
-    review1 = []
-    user_marked = []
-    user_eaten = dict(rname = rests1, score = score1, review = review1)
-    email =  request.form['email']
-    myUid = email
-    name =  request.form['name']
-    g.conn.execute('INSERT INTO Users(uid, name, gender, date_of_birth, lid) VALUES (%s, %s, %s, %s, %s)', myUid, name, None, None, None)
-    cursor = g.conn.execute("SELECT * FROM users U WHERE U.uid = %s", myUid)
-    information = []
-    for result in cursor:
-        for column in result:
-            information.append(column)
-    cursor.close()
-
-    cursor2 = g.conn.execute("SELECT L.street_num, L.street, \
-                                     L.city, L.zip\
-                              FROM Locations L\
-                              WHERE L.lid=%s", str(information[4]))
-    locationStr1 = ""
-    for result in cursor2:
-        locationStr1 = locationStr1 + result[0]
-        locationStr1 = locationStr1 + result[1]
-        locationStr1 = locationStr1 + result[2]
-        locationStr1 = locationStr1 + str(result[3])
-    cursor2.close()
-    information[4] = locationStr1
-
-    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked)
+    user_info['email'] = request.form['email']
+    user_info['name'] = request.form['name']
+    user_info['gender'] = None
+    user_info['DOB'] = None
+    user_info['lid'] = None
+    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked,user_info=user_info)
   
 @app.route('/login',methods=['POST'])
 def login():
