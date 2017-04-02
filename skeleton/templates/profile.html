@@ -28,11 +28,11 @@
   <table border = 1>
   <thead><tr><th>Restaurant Name</th><th>Score</th><th>Review</th><tr><thead>
   <tbody>
-    {% for row_index in range(result['rname']|count) %}
+    {% for row_index in range(user_eaten['rname']|count) %}
         <tr>
-          <td>{{ result['rname'][row_index][0] }}</td>
-          <td>{{ result['score'][row_index][0] }}</td>
-          <td>{{ result['review'][row_index][0] }}</td>
+          <td>{{ user_eaten['rname'][row_index][0] }}</td>
+          <td>{{ user_eaten['score'][row_index][0] }}</td>
+          <td>{{ user_eaten['review'][row_index][0] }}</td>
         </tr>
     {% endfor %}
   </tbody>
@@ -41,7 +41,7 @@
   <h1>Marked</h1>
 
   <div>
-    {% for n in marked %}
+    {% for n in user_marked %}
     <div>{{n}}</div>
     {% endfor %}
   </div>
