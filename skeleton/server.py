@@ -356,6 +356,7 @@ def swipe():
     otherUsersDisplay = []
     global rests1
     error = None
+    global result1
     result1 = dict(error = error)
     rests1 = []
     score1 = []
@@ -414,7 +415,7 @@ def send():
     month = int(request.form['month'])
     day = int(request.form['day'])
     g.conn.execute("INSERT INTO Requests(send_uid,accepted_uid,date,contact_info) VALUES (%s,%s,ARRAY[%s,%s,%s],%s)", myUid, targetID, year, month, day, contactInfo)
-    return render_template("swipe.html", **context)
+    return render_template("swipe.html", result = result1, **context)
 
 # get restaurant profile page
 @app.route('/restaurant', methods=['POST'])
