@@ -192,7 +192,11 @@ def change_location():
 
 @app.route('/send_request',methods=['POST'])
 def send_request():
-    return render_template("request.html", **context)
+    liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", targetID, myUid)
+    isLiked = (liker_uid.fetchone()[0] == 1)
+    if (isLiked):
+        return render_template("request.html", **context)
+    return render_template("notMatched.html")
 
 @app.route('/signup',methods=['POST'])
 def signup():
@@ -268,16 +272,14 @@ def login():
 # Random suggestion swiping page
 @app.route('/swipe', methods=['POST'])
 def swipe():
-    global targetID
-    targetID = "fake"
-
+    
     isLike = request.form['submit']
     if (isLike == 'Yes'):
         print('like')
-        liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", myUid, otherUsers[0][0])
+        liker_uid = g.conn.execute("SELECT COUNT(*) FROM interest I WHERE I.liker_uid=%s AND I.likee_uid=%s", myUid, targetID)
         likeNotExists = (liker_uid.fetchone()[0] == 0)
         if likeNotExists:
-            g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES (%s,%s)", myUid, otherUsers[0][0])
+            g.conn.execute("INSERT INTO interest(liker_uid,likee_uid) VALUES (%s,%s)", myUid, targetID)
 
 #    isback = request.form['submit']
 #    if (isback == 'Back to swipe'):
@@ -309,6 +311,9 @@ def swipe():
     cursorMyMarked.close()
 
     while True:
+        global targetID
+        targetID = "fake"
+
         cursorTargetID = g.conn.execute("SELECT U.uid \
                                          FROM Users U, Locations L \
                                          WHERE U.lid=L.lid AND L.city=%s \
