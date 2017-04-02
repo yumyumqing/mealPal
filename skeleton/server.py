@@ -172,7 +172,8 @@ def change_DOB():
   year=request.form['year']
   DOB = [year, month, day]
   print(DOB)
-  g.conn.execute('UPDATE Users SET date_of_birth = %r WHERE uid = %s', tuple(DOB), myUid)
+  DOB_string = '{'+year+','+month+','+day+'}'
+  g.conn.execute('UPDATE Users SET date_of_birth = %s WHERE uid = %s', DOB_string, myUid)
   user_info['DOB'] = DOB
   return render_template("personal_profile.html", user_info=user_info)
 
