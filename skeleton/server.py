@@ -115,6 +115,15 @@ def add_eaten():
   rid = request.form['rid']
   score = request.form['score']
   review = request.form['review']
+
+  checkCursor = g.conn.execute('SELECT COUNT(*) FROM restaurants R \
+                                WHERE R.rid = %s', rid)
+  isExist = checkCursor.fetchone()[0]
+  if (isExist < 1):
+      print("")
+      ########### still food_profile page
+  checkCursor.close()
+
   cursor =  g.conn.execute('SELECT R.rname FROM restaurants R WHERE R.rid = %s', rid)
   for result in cursor:
     rests1.append(result)
@@ -127,6 +136,15 @@ def add_eaten():
 @app.route('/add_marked', methods=['POST'])
 def add_marked():
   mark_rid=request.form['rid']
+
+  checkCursor = g.conn.execute('SELECT COUNT(*) FROM restaurants R \
+                                WHERE R.rid = %s', mark_rid)
+  isExist = checkCursor.fetchone()[0]
+  if (isExist < 1):
+     print("")
+ ########### still food_profile page
+  checkCursor.close()
+
   cursor =  g.conn.execute('SELECT R.rname FROM restaurants R WHERE R.rid = %s', mark_rid)
   for result in cursor:
     user_marked.append(result)
@@ -178,6 +196,13 @@ def change_DOB():
   year=int(request.form['year'])
   DOB = [year, month, day]
   print(DOB)
+
+  if ((month<1 or month>12) or \
+          (day<1 or day>31) or \
+          (year<1800 or year>2018)):
+     print("")
+ ################# still this page
+
   g.conn.execute('UPDATE Users SET date_of_birth = ARRAY[%s,%s,%s] WHERE uid = %s', year, month, day, myUid)
   user_info['DOB'] = DOB
   return render_template("personal_profile.html", user_info=user_info)
@@ -251,6 +276,14 @@ def login():
       user_info['lid'] = result[4]
     cursor.close()
 
+# check if there is a lid for myUser
+    cursorCheck = g.conn.execute("SELECT U.lid FROM users U\
+                                  WHERE U.uid=%s", myUid)
+    userLid = cursorCheck.fetchone()[0]
+    cursorCheck.close()
+    if (userLid == None):
+        locationStr = None
+
     cursor2 = g.conn.execute("SELECT L.street_num, L.street, L.city, L.zip\
                             FROM Locations L\
                             WHERE L.lid=%s", user_info['lid'])
@@ -262,6 +295,7 @@ def login():
       locationStr = locationStr + str(result[3])
     cursor2.close()
     user_info['lid'] = locationStr
+
     cur_rname = g.conn.execute("SELECT R.rname FROM restaurants R, ate A WHERE R.rid = A.rid AND A.uid = %s", myUid)
     for result in cur_rname:
       rests1.append(result)
@@ -314,6 +348,10 @@ def swipe():
     myCity = cursorMyCity.fetchone()[0];
     cursorMyCity.close()
 
+    if (myCity == None):
+      print("")
+  ######### return to profile page
+
     cursorMyEaten = g.conn.execute("SELECT A.rid \
                                     FROM Ate A \
                                     WHERE A.uid=%s", myUid)
@@ -328,6 +366,10 @@ def swipe():
         myMarkedList.append(result)
     cursorMyMarked.close()
 
+    if (myMarkedList.count < 1 and myEatenList.count < 1):
+       print("")
+ ###### return to profile page
+
     while True:
         cursorTargetID = g.conn.execute("SELECT U.uid \
                                          FROM Users U, Locations L \
@@ -338,6 +380,10 @@ def swipe():
                                     LIMIT 1", myCity, myUid, targetID)
         targetID = cursorTargetID.fetchone()[0]
         cursorTargetID.close()
+
+        if (targetID == None):
+           print("")
+ ### return to profile page
 
         targetEatenList = []
         targetMarkedList = []
@@ -367,7 +413,7 @@ def swipe():
             for targetRow in targetMarkedList:
                 if (targetRow == myRow):
                     hasSameMarked = True
-        if ((hasSameEaten==True) and (hasSameMarked==True)):
+        if ((hasSameEaten==True) or (hasSameMarked==True)):
             break
 
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", targetID)
@@ -390,12 +436,17 @@ def swipe():
     for result in cursor:
       otherUsers.append(result)  
     cursor.close()
-    
+
     cursorLoc = g.conn.execute("SELECT L.street_num, L.street, L.city, L.zip FROM locations L WHERE L.lid=%s", otherUsers[0][4])
     for result in cursorLoc:
         otherUsersLocation.append(result)
     cursorLoc.close()
-    otherUsersDisplay = [otherUsers[0][1], otherUsers[0][2], otherUsers[0][3], otherUsersLocation[0][0], otherUsersLocation[0][1], otherUsersLocation[0][2], otherUsersLocation[0][3]]
+    
+    # check if the target user has location info
+    if (otherUsersLocation.count > 0):
+        otherUsersDisplay = [otherUsers[0][1], otherUsers[0][2], otherUsers[0][3], otherUsersLocation[0][0], otherUsersLocation[0][1], otherUsersLocation[0][2], otherUsersLocation[0][3]]
+    else:
+        otherUsersDisplay = [otherUsers[0][1], otherUsers[0][2], otherUsers[0][3], None, None, None, None]
 
     cur_rname = g.conn.execute("SELECT R.rname \
                              FROM restaurants R, ate A \
@@ -437,6 +488,14 @@ def send():
     year = int(request.form['year'])
     month = int(request.form['month'])
     day = int(request.form['day'])
+
+    if ((month<1 or month>12) or \
+        (day<1 or day>31) or \
+        (year<1800 or year>2018)\
+          or (contactInfo == None)):
+        print("")
+  ################ still this page#
+
     g.conn.execute("INSERT INTO Requests(send_uid,accepted_uid,date,contact_info) VALUES (%s,%s,ARRAY[%s,%s,%s],%s)", myUid, targetID, year, month, day, contactInfo)
     return render_template("successSent.html")
 #    return render_template("swipe.html",otherUser_eaten = otherUser_eaten, otherUsersDisplay = otherUsersDisplay,otherUser_marked=otherUser_marked)
