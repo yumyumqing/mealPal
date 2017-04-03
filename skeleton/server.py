@@ -102,7 +102,9 @@ def add():
 @app.route('/see_request', methods=['POST'])
 def see_request():
   your_request = []
-  cursor =  g.conn.execute('SELECT * FROM requests Re WHERE Re.accepted_uid = %s', myUid)
+  cursor =  g.conn.execute('SELECT U.name, U.gender, U.date_of_birth, Re.date, Re.contact_info \
+                            FROM Users U, requests Re \
+                            WHERE U.uid = Re.send_uid AND Re.accepted_uid = %s', myUid)
   for item in cursor:
     your_request.append(item)
   cursor.close()

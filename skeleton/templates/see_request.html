@@ -9,11 +9,26 @@
 
 <body>
   <h1>All requests sent to you</h1>
-  <div>
-    {% for n in your_request %}
-    <div>{{n}}</div>
-    {% endfor %}
-  </div>
+  <table border = 1>
+      <thead>
+          <tr>
+              <th>From</th><th>Gender</th><th>Born at</th>
+              <th>Request Date On</th><th>Contact Info</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for n in your_request %}
+          <tr>
+              <td>{{ n[0] }}</td>
+              <td>{{ n[1] }}</td>
+              <td>{{ n[2] }}</td>
+              <td>{{ n[3] }}</td>
+              <td>{{ n[4] }}</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+
   <form method="POST" action="/back_to_personal_profile">
   <p><input type="submit" name="submit" value="Back to Profile">
   </p>
