@@ -119,10 +119,9 @@ def add_eaten():
   checkCursor = g.conn.execute('SELECT COUNT(*) FROM restaurants R \
                                 WHERE R.rid = %s', rid)
   isExist = checkCursor.fetchone()[0]
-  if (isExist < 1):
-      print("")
-      ########### still food_profile page
   checkCursor.close()
+  if (isExist < 1):
+    return render_template("food_profile.html", result=all_rests)
 
   cursor =  g.conn.execute('SELECT R.rname FROM restaurants R WHERE R.rid = %s', rid)
   for result in cursor:
@@ -140,10 +139,9 @@ def add_marked():
   checkCursor = g.conn.execute('SELECT COUNT(*) FROM restaurants R \
                                 WHERE R.rid = %s', mark_rid)
   isExist = checkCursor.fetchone()[0]
-  if (isExist < 1):
-     print("")
- ########### still food_profile page
   checkCursor.close()
+  if (isExist < 1):
+    return render_template("food_profile.html", result=all_rests)
 
   cursor =  g.conn.execute('SELECT R.rname FROM restaurants R WHERE R.rid = %s', mark_rid)
   for result in cursor:
@@ -200,8 +198,7 @@ def change_DOB():
   if ((month<1 or month>12) or \
           (day<1 or day>31) or \
           (year<1800 or year>2018)):
-     print("")
- ################# still this page
+    return render_template("personal_profile.html", user_info=user_info)
 
   g.conn.execute('UPDATE Users SET date_of_birth = ARRAY[%s,%s,%s] WHERE uid = %s', year, month, day, myUid)
   user_info['DOB'] = DOB
@@ -349,8 +346,8 @@ def swipe():
     cursorMyCity.close()
 
     if (myCity == None):
-      print("")
-  ######### return to profile page
+      return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
+
 
     cursorMyEaten = g.conn.execute("SELECT A.rid \
                                     FROM Ate A \
@@ -367,8 +364,7 @@ def swipe():
     cursorMyMarked.close()
 
     if (myMarkedList.count < 1 and myEatenList.count < 1):
-       print("")
- ###### return to profile page
+      return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
 
     while True:
         cursorTargetID = g.conn.execute("SELECT U.uid \
@@ -379,11 +375,11 @@ def swipe():
                                          ORDER BY RANDOM() \
                                     LIMIT 1", myCity, myUid, targetID)
         targetID = cursorTargetID.fetchone()[0]
+        print(targetID)
         cursorTargetID.close()
 
         if (targetID == None):
-           print("")
- ### return to profile page
+          return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
 
         targetEatenList = []
         targetMarkedList = []
@@ -493,8 +489,7 @@ def send():
         (day<1 or day>31) or \
         (year<1800 or year>2018)\
           or (contactInfo == None)):
-        print("")
-  ################ still this page#
+      return render_template("request.html")
 
     g.conn.execute("INSERT INTO Requests(send_uid,accepted_uid,date,contact_info) VALUES (%s,%s,ARRAY[%s,%s,%s],%s)", myUid, targetID, year, month, day, contactInfo)
     return render_template("successSent.html")
