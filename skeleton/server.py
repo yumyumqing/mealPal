@@ -122,7 +122,12 @@ def add_eaten():
                                 WHERE R.rid = %s', rid)
   isExist = checkCursor.fetchone()[0]
   checkCursor.close()
-  if (isExist < 1):
+  scoreValid = False
+  if (score != ''):
+      if (int(score) >= 1 and int(score) <= 5):
+          scoreValid = True
+
+  if ((isExist < 1) or (scoreValid == False)):
     return render_template("food_profile.html", result=all_rests)
 
   cursor =  g.conn.execute('SELECT R.rname FROM restaurants R WHERE R.rid = %s', rid)

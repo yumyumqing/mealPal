@@ -23,14 +23,14 @@
 
   <form method="POST" action="/add_eaten">
   <p>I have eaten there: </p>
-  <p>rid:
+  <p>Restaurant ID:
   <input type="text" name="rid">
   </p>
-  <p>score:
+  <p>Score (1-5):
   <input type="text" name="score">
   </p>
-  <p>review:
-  <input type="text" name="review">
+  <p>Review:
+  <input type="text" size=50 name="review">
   </p>
   <input type="submit" value="add"></p>
   </form>
@@ -41,6 +41,7 @@
   <input type="text" name="rid">
   </p>
   <input type="submit" value="add"></p>
+  <p>* If you enter wrong input, you will be redirected to this page again.</p>
   </form>
 
   <form method="POST" action="/back_to_personal_profile">
