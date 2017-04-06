@@ -82,7 +82,9 @@ def index():
 
   # DEBUG: this is debugging code to see what request looks like
   print request.args
-
+  global targetID
+  targetID = "fake"
+  print(targetID)
   cursor = g.conn.execute("SELECT name FROM test")
   names = []
   for result in cursor:
@@ -320,8 +322,6 @@ def login():
 @app.route('/swipe', methods=['POST'])
 def swipe():
     global targetID
-    targetID = "fake"
-
     isLike = request.form['submit']
     if (isLike == 'Yes'):
         print('like')
@@ -366,33 +366,34 @@ def swipe():
     if (myMarkedList.count < 1 and myEatenList.count < 1):
       return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
 
-    while True:
+    newTargetID = ""
+    while True and targetID!=newTargetID:
         cursorTargetID = g.conn.execute("SELECT U.uid \
                                          FROM Users U, Locations L \
-                                         WHERE U.lid=L.lid AND L.city=%s \
-                                               AND U.uid!=%s\
-                                               AND U.uid!=%s\
+                                         WHERE U.lid=L.lid \
+                                               AND U.uid!=%s \
+                                               AND U.uid!=%s \
+                                               AND L.city=%s \
                                          ORDER BY RANDOM() \
-                                    LIMIT 1", myCity, myUid, targetID)
-        targetID = cursorTargetID.fetchone()[0]
-        print(targetID)
+                                    LIMIT 1", myUid, targetID, myCity)
+        newTargetID = cursorTargetID.fetchone()[0]
         cursorTargetID.close()
 
-        if (targetID == None):
+        if (newTargetID == None):
           return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
 
         targetEatenList = []
         targetMarkedList = []
         cursorTargetEaten = g.conn.execute("SELECT A.rid \
                                             FROM Ate A \
-                                            WHERE A.uid=%s", targetID)
+                                            WHERE A.uid=%s", newTargetID)
         for result in cursorTargetEaten:
             targetEatenList.append(result)
         cursorTargetEaten.close()
 
         cursorTargetMarked = g.conn.execute("SELECT M.rid \
                                              FROM Marked M \
-                                             WHERE M.uid=%s", targetID)
+                                             WHERE M.uid=%s", newTargetID)
         for result in cursorTargetMarked:
             targetMarkedList.append(result)
         cursorTargetMarked.close()
@@ -411,7 +412,7 @@ def swipe():
                     hasSameMarked = True
         if ((hasSameEaten==True) or (hasSameMarked==True)):
             break
-
+    targetID = newTargetID
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", targetID)
     
     global otherUsers
