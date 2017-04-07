@@ -184,8 +184,9 @@ def change_name():
 @app.route('/change_gender', methods=['POST'])
 def change_gender():
   gender=request.form['gender']
-  g.conn.execute('UPDATE Users SET gender = %s WHERE uid = %s', gender, myUid)
-  user_info['gender'] = gender
+  if gender == "f" or gender == "m":
+    g.conn.execute('UPDATE Users SET gender = %s WHERE uid = %s', gender, myUid)
+    user_info['gender'] = gender
   return render_template("personal_profile.html", user_info=user_info)
 
 @app.route('/change_DOB', methods=['POST'])
@@ -212,12 +213,13 @@ def change_location():
   street=request.form['street']
   street_num=request.form['street_num']
   zip_code=request.form['zip_code']
-  count = g.conn.execute("SELECT COUNT(*) FROM locations").fetchone()[0]
-  lid = str(lid_start + count + 1)
-  g.conn.execute('INSERT INTO locations(lid, city, street, street_num, zip) VALUES (%s, %s, %s, %s, %s)', lid, city,street, street_num, zip_code)
-  g.conn.execute('UPDATE Users SET lid = %s WHERE uid = %s', lid, myUid)
-  user_info['lid'] = street_num+" "+street+" "+city+" "+zip_code
-  print(user_info)
+  if city!='' and street!='' and street_num!='' and zip_code!='':
+    count = g.conn.execute("SELECT COUNT(*) FROM locations").fetchone()[0]
+    lid = str(lid_start + count + 1)
+    g.conn.execute('INSERT INTO locations(lid, city, street, street_num, zip) VALUES (%s, %s, %s, %s, %s)', lid, city,street, street_num, zip_code)
+    g.conn.execute('UPDATE Users SET lid = %s WHERE uid = %s', lid, myUid)
+    user_info['lid'] = street_num+" "+street+" "+city+" "+zip_code
+    print(user_info)
   return render_template("personal_profile.html", user_info=user_info)
 
 @app.route('/send_request',methods=['POST'])
@@ -235,8 +237,10 @@ def signup():
     user_info['gender'] = None
     user_info['DOB'] = None
     user_info['lid'] = None
-    g.conn.execute("INSERT INTO Users(uid, name, gender, date_of_birth, lid) VALUES (%s, %s, %s, %s, %s)",user_info['email'],user_info['email'],None, None, None)
-    return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked,user_info=user_info)
+    if len(user_info['email'])<=20 and user_info['email']!='' and user_info['name']!='':
+      g.conn.execute("INSERT INTO Users(uid, name, gender, date_of_birth, lid) VALUES (%s, %s, %s, %s, %s)",user_info['email'],user_info['email'],None, None, None)
+      return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked,user_info=user_info)
+    return render_template("signup.html")
   
 @app.route('/login',methods=['POST'])
 def login():
