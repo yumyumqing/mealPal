@@ -351,13 +351,16 @@ def swipe():
     cursorMyCity = g.conn.execute("SELECT L.city \
                                    FROM Users U, Locations L \
                                    WHERE U.uid=%s AND U.lid=L.lid", myUid)
-    myCity = cursorMyCity.fetchone()[0];
-    cursorMyCity.close()
-
-    if (myCity == None):
+    if (cursorMyCity.fetchone()==None):
+      cursorMyCity.close()
       return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
-
-
+    cursorMyCity.close()
+    cursorMyCity2 = g.conn.execute("SELECT L.city \
+                                   FROM Users U, Locations L \
+                                   WHERE U.uid=%s AND U.lid=L.lid", myUid) 
+    myCity = cursorMyCity2.fetchone()[0]
+    cursorMyCity2.close()
+    print(myCity)
     cursorMyEaten = g.conn.execute("SELECT A.rid \
                                     FROM Ate A \
                                     WHERE A.uid=%s", myUid)
@@ -377,6 +380,7 @@ def swipe():
 
     newTargetID = ""
     while True and targetID!=newTargetID:
+        notFound = False
         cursorTargetID = g.conn.execute("SELECT U.uid \
                                          FROM Users U, Locations L \
                                          WHERE U.lid=L.lid \
@@ -385,9 +389,18 @@ def swipe():
                                                AND L.city=%s \
                                          ORDER BY RANDOM() \
                                     LIMIT 1", myUid, targetID, myCity)
-        newTargetID = cursorTargetID.fetchone()[0]
+        if (cursorTargetID.fetchone()==None):
+          cursorTargetID2 = g.conn.execute("SELECT U.uid \
+                                           FROM Users U \
+                                           WHERE U.uid!=%s \
+                                                 AND U.uid!=%s \
+                                           ORDER BY RANDOM() \
+                                    LIMIT 1", myUid, targetID)
+          notFound = True
+        newTargetID = cursorTargetID2.fetchone()[0]
+        print(newTargetID)
         cursorTargetID.close()
-
+        cursorTargetID2.close()
         if (newTargetID == None):
           return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
 
@@ -419,7 +432,7 @@ def swipe():
             for targetRow in targetMarkedList:
                 if (targetRow == myRow):
                     hasSameMarked = True
-        if ((hasSameEaten==True) or (hasSameMarked==True)):
+        if ((hasSameEaten==True) or (hasSameMarked==True) or (notFound == True)):
             break
     targetID = newTargetID
     cursor = g.conn.execute("SELECT * FROM Users U WHERE U.uid=%s", targetID)
@@ -442,14 +455,14 @@ def swipe():
     for result in cursor:
       otherUsers.append(result)  
     cursor.close()
-
+    print(otherUsers)
+    print(otherUsers[0][4])
     cursorLoc = g.conn.execute("SELECT L.street_num, L.street, L.city, L.zip FROM locations L WHERE L.lid=%s", otherUsers[0][4])
     for result in cursorLoc:
         otherUsersLocation.append(result)
     cursorLoc.close()
-    
     # check if the target user has location info
-    if (otherUsersLocation.count > 0):
+    if (otherUsers[0][4]!=None):
         otherUsersDisplay = [otherUsers[0][1], otherUsers[0][2], otherUsers[0][3], otherUsersLocation[0][0], otherUsersLocation[0][1], otherUsersLocation[0][2], otherUsersLocation[0][3]]
     else:
         otherUsersDisplay = [otherUsers[0][1], otherUsers[0][2], otherUsers[0][3], None, None, None, None]
