@@ -379,6 +379,7 @@ def swipe():
       return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
 
     newTargetID = ""
+    targetID = myUid
     while True and targetID!=newTargetID:
         notFound = False
         cursorTargetID = g.conn.execute("SELECT U.uid \
@@ -397,10 +398,20 @@ def swipe():
                                            ORDER BY RANDOM() \
                                     LIMIT 1", myUid, targetID)
           notFound = True
-        newTargetID = cursorTargetID2.fetchone()[0]
-        print(newTargetID)
-        cursorTargetID.close()
-        cursorTargetID2.close()
+          newTargetID = cursorTargetID2.fetchone()[0]
+          cursorTargetID.close()
+          cursorTargetID2.close()
+        else:
+          cursorTargetID3 = g.conn.execute("SELECT U.uid \
+                                         FROM Users U, Locations L \
+                                         WHERE U.lid=L.lid \
+                                               AND U.uid!=%s \
+                                               AND U.uid!=%s \
+                                               AND L.city=%s \
+                                         ORDER BY RANDOM() \
+                                    LIMIT 1", myUid, targetID, myCity)
+          newTargetID = cursorTargetID3.fetchone()[0]
+          cursorTargetID3.close()
         if (newTargetID == None):
           return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked, user_info=user_info)
 
@@ -455,8 +466,7 @@ def swipe():
     for result in cursor:
       otherUsers.append(result)  
     cursor.close()
-    print(otherUsers)
-    print(otherUsers[0][4])
+    print(len(otherUsers))
     cursorLoc = g.conn.execute("SELECT L.street_num, L.street, L.city, L.zip FROM locations L WHERE L.lid=%s", otherUsers[0][4])
     for result in cursorLoc:
         otherUsersLocation.append(result)
