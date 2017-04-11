@@ -127,7 +127,12 @@ def add_eaten():
       if (int(score) >= 1 and int(score) <= 5):
           scoreValid = True
 
-  if ((isExist < 1) or (scoreValid == False)):
+  checkAddedCursor = g.conn.execute('SELECT COUNT(*) FROM Ate A \
+                                     WHERE A.uid = %s AND A.rid = %s', myUid, rid)
+  isAdded = checkAddedCursor.fetchone()[0]
+  checkAddedCursor.close()
+
+  if ((isExist < 1) or (scoreValid == False) or (isAdded > 0)):
     return render_template("food_profile.html", result=all_rests)
 
   cursor =  g.conn.execute('SELECT R.rname FROM restaurants R WHERE R.rid = %s', rid)
@@ -147,7 +152,13 @@ def add_marked():
                                 WHERE R.rid = %s', mark_rid)
   isExist = checkCursor.fetchone()[0]
   checkCursor.close()
-  if (isExist < 1):
+
+  checkMarkedCursor = g.conn.execute('SELECT COUNT(*) FROM Marked M \
+                                      WHERE M.uid = %s AND M.rid = %s', myUid, mark_rid)
+  isMarked = checkMarkedCursor.fetchone()[0]
+  checkMarkedCursor.close()
+
+  if ((isExist < 1) or (isMarked > 0)):
     return render_template("food_profile.html", result=all_rests)
 
   cursor =  g.conn.execute('SELECT R.rname FROM restaurants R WHERE R.rid = %s', mark_rid)
@@ -242,7 +253,13 @@ def signup():
     user_info['gender'] = None
     user_info['DOB'] = None
     user_info['lid'] = None
-    if len(user_info['email'])<=20 and user_info['email']!='' and user_info['name']!='':
+
+    # check if this email is already in the table
+    checkEmailExistCursor = g.conn.execute('SELECT COUNT(*) FROM Users U WHERE U.uid = %s', user_info['email'])
+    isEmailExist = checkEmailExistCursor.fetchone()[0]
+    checkEmailExistCursor.close()
+
+    if len(user_info['email'])<=20 and user_info['email']!='' and user_info['name']!='' and isEmailExist < 1:
       g.conn.execute("INSERT INTO Users(uid, name, gender, date_of_birth, lid) VALUES (%s, %s, %s, %s, %s)",user_info['email'],user_info['email'],None, None, None)
       return render_template("profile.html", user_eaten=user_eaten, user_marked=user_marked,user_info=user_info)
     return render_template("signup.html")
